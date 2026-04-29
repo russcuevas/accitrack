@@ -15,6 +15,28 @@
         }
 
         :root {
+            --bg-primary: #0d2040;
+            --bg-secondary: #0d2040;
+            --bg-tertiary: #0b1a2e;
+            --bg-info: #0c2a44;
+            --bg-success: #172a0a;
+            --bg-warning: #2a1e06;
+            --bg-danger: #2a0f0f;
+            --text-primary: #f0ede8;
+            --text-secondary: #a0a09a;
+            --text-tertiary: #6a6a64;
+            --text-info: #85b7eb;
+            --text-success: #97c459;
+            --text-warning: #fac775;
+            --text-danger: #f09595;
+            --border: rgba(255, 255, 255, 0.1);
+            --border-md: rgba(255, 255, 255, 0.18);
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        body.light-mode {
             --bg-primary: #ffffff;
             --bg-secondary: #f5f5f3;
             --bg-tertiary: #efefec;
@@ -31,30 +53,6 @@
             --text-danger: #a32d2d;
             --border: rgba(0, 0, 0, 0.12);
             --border-md: rgba(0, 0, 0, 0.2);
-            --radius-md: 8px;
-            --radius-lg: 12px;
-            --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-primary: #0d2040;
-                --bg-secondary: #0d2040;
-                --bg-tertiary: #0b1a2e;
-                --bg-info: #0c2a44;
-                --bg-success: #172a0a;
-                --bg-warning: #2a1e06;
-                --bg-danger: #2a0f0f;
-                --text-primary: #f0ede8;
-                --text-secondary: #a0a09a;
-                --text-tertiary: #6a6a64;
-                --text-info: #85b7eb;
-                --text-success: #97c459;
-                --text-warning: #fac775;
-                --text-danger: #f09595;
-                --border: rgba(255, 255, 255, 0.1);
-                --border-md: rgba(255, 255, 255, 0.18);
-            }
         }
 
         body {
@@ -562,7 +560,14 @@
             </nav>
 
             <div class="nav-bottom">
-                <a href="/admins/logout/" class="logout-btn">
+                <div class="nav-item" id="theme-toggle" onclick="toggleTheme()">
+                    <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+                      <path d="M8 12a4 4 0 100-8 4 4 0 000 8z" fill="currentColor" opacity=".7"/>
+                      <path d="M8 1v1M8 14v1M1 8h1M14 8h1M2.5 2.5l1 1M12.5 12.5l1 1M2.5 12.5l1-1M12.5 3.5l1-1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity=".7"/>
+                    </svg>
+                    <span id="theme-text">Light Mode</span>
+                </div>
+                <a href="{% url 'admins:logout' %}" class="logout-btn">
                     <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
                         <path d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h3M11 11l3-3-3-3M14 8H6" stroke="currentColor"
                             stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
@@ -767,6 +772,30 @@
     </script>
     {% endfor %}
     {% endif %}
+    <script>
+        function applyTheme() {
+            const theme = localStorage.getItem('theme') || 'dark';
+            if (theme === 'light') {
+                document.body.classList.add('light-mode');
+                const themeText = document.getElementById('theme-text');
+                if (themeText) themeText.textContent = 'Dark Mode';
+            } else {
+                document.body.classList.remove('light-mode');
+                const themeText = document.getElementById('theme-text');
+                if (themeText) themeText.textContent = 'Light Mode';
+            }
+            window.dispatchEvent(new Event('themeChanged'));
+        }
+
+        function toggleTheme() {
+            const current = localStorage.getItem('theme') || 'dark';
+            const next = current === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', next);
+            applyTheme();
+        }
+
+        applyTheme();
+    </script>
 </body>
 
 </html>

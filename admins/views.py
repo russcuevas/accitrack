@@ -68,55 +68,81 @@ def maps_view(request):
         
     from django.db.models import Count, Max
     from django.utils import timezone
-    
-    today = timezone.now().date()
-    
-    # 1. Today's Reports (Aggregated)
-    today_reports_qs = Report.objects.filter(
-        status='In Review',
-        date_filed__date=today,
-        latitude__isnull=False,
-        longitude__isnull=False
-    )
-    today_data = list(today_reports_qs.values('location_address').annotate(
-        count=Count('id'),
-        lat=Max('latitude'),
-        lng=Max('longitude'),
-        # Get the latest incident type and time for the label/popup
-        latest_type=Max('incident_type'),
-        latest_time=Max('incident_time')
-    ))
-    
-    # 2. Past Reports (Aggregated)
-    past_reports = Report.objects.filter(
-        status__in=['In Review', 'Resolved'],
-        date_filed__date__lt=today,
-        latitude__isnull=False, 
-        longitude__isnull=False
-    )
-    prone_data = list(past_reports.values('location_address').annotate(
-        count=Count('id'),
-        lat=Max('latitude'),
-        lng=Max('longitude')
-    ).order_by('-count'))
-    
+    from datetime import timedelta
     import json
-    for r in today_data:
-        r['lat'] = float(r['lat'])
-        r['lng'] = float(r['lng'])
-        # Convert time to string for JSON in AM/PM format
-        if r['latest_time']:
-            r['latest_time'] = r['latest_time'].strftime('%I:%M %p')
+    
+    now = timezone.now()
+    today = now.date()
+    yesterday = today - timedelta(days=1)
+    last_month_start = today - timedelta(days=30)
+    last_year_start = today - timedelta(days=365)
+    
+    def get_period_data(start_date, end_date=None, status_list=['In Review', 'Resolved']):
+        qs = Report.objects.filter(
+            latitude__isnull=False,
+            longitude__isnull=False
+        )
+        if end_date:
+            qs = qs.filter(date_filed__date__range=[start_date, end_date])
+        else:
+            qs = qs.filter(date_filed__date=start_date)
+            
+        if status_list:
+            qs = qs.filter(status__in=status_list)
+            
+        # Group for map
+        map_data = list(qs.values('location_address').annotate(
+            count=Count('id'),
+            lat=Max('latitude'),
+            lng=Max('longitude'),
+            latest_type=Max('incident_type'),
+            latest_time=Max('incident_time')
+        ))
         
-    for p in prone_data:
-        p['lat'] = float(p['lat'])
-        p['lng'] = float(p['lng'])
-        
+        for r in map_data:
+            r['lat'] = float(r['lat'])
+            r['lng'] = float(r['lng'])
+            if r.get('latest_time'):
+                r['latest_time'] = r['latest_time'].strftime('%I:%M %p')
+                
+        return map_data
+
+    # Datasets
+    today_active = get_period_data(today, status_list=['In Review'])
+    today_resolved = get_period_data(today, status_list=['Resolved'])
+    yesterday_data = get_period_data(yesterday)
+    month_data = get_period_data(last_month_start, today)
+    year_data = get_period_data(last_year_start, today)
+    
+    # Custom Month/Year Filter
+    sel_year = request.GET.get('year')
+    sel_month = request.GET.get('month')
+    custom_data = []
+    is_custom = False
+    
+    if sel_year and sel_month:
+        from datetime import date
+        import calendar
+        y, m = int(sel_year), int(sel_month)
+        last_day = calendar.monthrange(y, m)[1]
+        start_date = date(y, m, 1)
+        end_date = date(y, m, last_day)
+        custom_data = get_period_data(start_date, end_date)
+        is_custom = True
+
     context = get_admin_context(request)
     context.update({
-        'today_data_json': json.dumps(today_data),
-        'prone_data_json': json.dumps(prone_data),
-        'top_prone_list': prone_data[:10]
+        'today_active_json': json.dumps(today_active),
+        'today_resolved_json': json.dumps(today_resolved),
+        'yesterday_data_json': json.dumps(yesterday_data),
+        'month_data_json': json.dumps(month_data),
+        'year_data_json': json.dumps(year_data),
+        'custom_data_json': json.dumps(custom_data),
+        'is_custom': is_custom,
+        'sel_year': sel_year,
+        'sel_month': sel_month,
+        # Initial prone list
+        'top_prone_list': sorted(month_data, key=lambda x: x['count'], reverse=True)[:5]
     })
     return render(request, 'admins/maps.html', context)
 

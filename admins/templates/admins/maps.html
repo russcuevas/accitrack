@@ -17,6 +17,28 @@
         }
 
         :root {
+            --bg-primary: #0d2040;
+            --bg-secondary: #0d2040;
+            --bg-tertiary: #0b1a2e;
+            --bg-info: #0c2a44;
+            --bg-success: #172a0a;
+            --bg-warning: #2a1e06;
+            --bg-danger: #2a0f0f;
+            --text-primary: #f0ede8;
+            --text-secondary: #a0a09a;
+            --text-tertiary: #6a6a64;
+            --text-info: #85b7eb;
+            --text-success: #97c459;
+            --text-warning: #fac775;
+            --text-danger: #f09595;
+            --border: rgba(255, 255, 255, 0.1);
+            --border-md: rgba(255, 255, 255, 0.18);
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        body.light-mode {
             --bg-primary: #ffffff;
             --bg-secondary: #f5f5f3;
             --bg-tertiary: #efefec;
@@ -33,30 +55,6 @@
             --text-danger: #a32d2d;
             --border: rgba(0, 0, 0, 0.12);
             --border-md: rgba(0, 0, 0, 0.2);
-            --radius-md: 8px;
-            --radius-lg: 12px;
-            --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-primary: #0d2040;
-                --bg-secondary: #0d2040;
-                --bg-tertiary: #0b1a2e;
-                --bg-info: #0c2a44;
-                --bg-success: #172a0a;
-                --bg-warning: #2a1e06;
-                --bg-danger: #2a0f0f;
-                --text-primary: #f0ede8;
-                --text-secondary: #a0a09a;
-                --text-tertiary: #6a6a64;
-                --text-info: #85b7eb;
-                --text-success: #97c459;
-                --text-warning: #fac775;
-                --text-danger: #f09595;
-                --border: rgba(255, 255, 255, 0.1);
-                --border-md: rgba(255, 255, 255, 0.18);
-            }
         }
 
         body {
@@ -203,10 +201,79 @@
             font-weight: 500;
         }
 
-        .topbar-right {
+        /* PERIOD SELECTOR */
+        .period-selector {
+            display: flex;
+            background: var(--bg-secondary);
+            padding: 4px;
+            border-radius: var(--radius-md);
+            border: 0.5px solid var(--border);
+            gap: 4px;
+            align-items: center;
+        }
+
+        .filter-group {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
+            padding: 0 8px;
+            border-right: 0.5px solid var(--border);
+            margin-right: 4px;
+        }
+
+        .filter-group:last-child {
+            border-right: none;
+        }
+
+        .select-input {
+            background: var(--bg-primary);
+            border: 0.5px solid var(--border);
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 11px;
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .btn-filter-go {
+            padding: 4px 10px;
+            background: var(--text-info);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-reset {
+            padding: 4px 10px;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border: 0.5px solid var(--border);
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .period-btn {
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 4px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .period-btn.active {
+            background: var(--bg-primary);
+            color: var(--text-info);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         .profile-pill {
@@ -252,20 +319,97 @@
             z-index: 1;
         }
 
-        /* PRONE PANEL */
-        .prone-panel {
+        /* MODAL STYLES */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-card {
+            width: 1000px;
+            max-width: 95%;
+            background: var(--bg-primary);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            animation: modal-in 0.3s ease-out;
+        }
+
+        @keyframes modal-in {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 24px 30px;
+            background: var(--bg-secondary);
+            border-bottom: 0.5px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            cursor: pointer;
+            color: var(--text-tertiary);
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 20px 0;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        /* VIEW BUTTON */
+        .btn-show-prone {
             position: absolute;
             top: 80px;
             right: 20px;
-            width: 280px;
+            z-index: 1000;
+            padding: 10px 18px;
             background: var(--bg-primary);
             border: 0.5px solid var(--border);
-            border-radius: var(--radius-lg);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-show-prone:hover {
+            background: var(--bg-secondary);
+            transform: translateY(-1px);
         }
 
         /* MAP LEGEND */
@@ -553,6 +697,14 @@
             </nav>
 
             <div class="nav-bottom">
+                <div class="nav-item" id="theme-toggle" onclick="toggleTheme()">
+                    <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+                        <path d="M8 12a4 4 0 100-8 4 4 0 000 8z" fill="currentColor" opacity=".7" />
+                        <path d="M8 1v1M8 14v1M1 8h1M14 8h1M2.5 2.5l1 1M12.5 12.5l1 1M2.5 12.5l1-1M12.5 3.5l1-1"
+                            stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity=".7" />
+                    </svg>
+                    <span id="theme-text">Light Mode</span>
+                </div>
                 <a href="/admins/logout/" class="logout-btn text-decoration-none text-dark">
                     <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
                         <path d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h3M11 11l3-3-3-3M14 8H6" stroke="currentColor"
@@ -565,6 +717,49 @@
 
         <!-- MAIN CONTENT -->
         <div class="main">
+            <div class="topbar">
+                <div class="topbar-title">Historical Insight Map</div>
+                <div class="topbar-right">
+                    <div class="period-selector">
+                        <!-- Custom Filters -->
+                        <form action="" method="GET" class="filter-group">
+                            <select name="month" class="select-input" required>
+                                <option value="">Month</option>
+                                <option value="1" {% if sel_month == '1' %}selected{% endif %}>Jan</option>
+                                <option value="2" {% if sel_month == '2' %}selected{% endif %}>Feb</option>
+                                <option value="3" {% if sel_month == '3' %}selected{% endif %}>Mar</option>
+                                <option value="4" {% if sel_month == '4' %}selected{% endif %}>Apr</option>
+                                <option value="5" {% if sel_month == '5' %}selected{% endif %}>May</option>
+                                <option value="6" {% if sel_month == '6' %}selected{% endif %}>Jun</option>
+                                <option value="7" {% if sel_month == '7' %}selected{% endif %}>Jul</option>
+                                <option value="8" {% if sel_month == '8' %}selected{% endif %}>Aug</option>
+                                <option value="9" {% if sel_month == '9' %}selected{% endif %}>Sep</option>
+                                <option value="10" {% if sel_month == '10' %}selected{% endif %}>Oct</option>
+                                <option value="11" {% if sel_month == '11' %}selected{% endif %}>Nov</option>
+                                <option value="12" {% if sel_month == '12' %}selected{% endif %}>Dec</option>
+                            </select>
+                            <select name="year" class="select-input" required>
+                                <option value="">Year</option>
+                                <option value="2024" {% if sel_year == '2024' %}selected{% endif %}>2024</option>
+                                <option value="2025" {% if sel_year == '2025' %}selected{% endif %}>2025</option>
+                                <option value="2026" {% if sel_year == '2026' %}selected{% endif %}>2026</option>
+                            </select>
+                            <button type="submit" class="btn-filter-go">Go</button>
+                            {% if is_custom %}
+                            <a href="/admins/maps/" class="btn-reset">Reset</a>
+                            {% endif %}
+                        </form>
+
+                        <!-- Preset Periods (Hidden if custom month selected) -->
+                        {% if not is_custom %}
+                        <button class="period-btn active" onclick="switchPeriod('today', this)">Today</button>
+                        <button class="period-btn" onclick="switchPeriod('yesterday', this)">Yesterday</button>
+                        <button class="period-btn" onclick="switchPeriod('month', this)">Last 30 Days</button>
+                        <button class="period-btn" onclick="switchPeriod('year', this)">Last 1 Year</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
 
             <div class="content">
                 <!-- BIG MAP -->
@@ -574,15 +769,45 @@
                 <div class="map-legend">
                     <div class="legend-item">
                         <div class="legend-circle lc-yellow"></div>
-                        <span>Today's Incidents</span>
+                        <span>Active Incidents</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-circle lc-red"></div>
-                        <span>Historical Prone Areas (Resolved/Past)</span>
+                        <span>Prone Incidents Hotspots</span>
                     </div>
                 </div>
 
-                <!-- PRONE PANEL (Optional Sidebar) -->
+                <!-- VIEW PRONE BUTTON -->
+                <div class="btn-show-prone" onclick="toggleModal(true)">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                        <path d="M8 1c3.3 0 6 2.7 6 6 0 4.3-6 8-6 8s-6-3.7-6-8c0-3.3 2.7-6 6-6z" stroke="currentColor"
+                            stroke-width="1.5" />
+                    </svg>
+                    View Top Prone Spots
+                </div>
+
+                <!-- MODAL FOR PRONE LIST -->
+                <div class="modal-overlay" id="proneModal">
+                    <div class="modal-card">
+                        <div class="modal-header">
+                            <div>
+                                <div class="modal-title">Top Prone Accidents</div>
+                                <div id="period-label"
+                                    style="font-size: 10px; color: var(--text-warning); text-transform: uppercase; margin-top: 2px;">
+                                    TODAY</div>
+                            </div>
+                            <div class="modal-close" onclick="toggleModal(false)">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M18 6L6 18M6 6l12 12" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="modal-body" id="prone-list-container">
+                            <!-- Dynamic content -->
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -592,18 +817,23 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        var isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        var cartoDark = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
-        var cartoLight = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-
-        var map = L.map('bigMap', { zoomControl: false }).setView([13.9419, 121.1644], 12);
-
-        // Move zoom control to bottom right so it doesn't overlap topbar
+        const map = L.map('bigMap', { zoomControl: false }).setView([13.9419, 121.1644], 12);
         L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-        L.tileLayer(isDark ? cartoDark : cartoLight, {
-            attribution: '&copy; OpenStreetMap &copy; CARTO'
-        }).addTo(map);
+        let currentTileLayer;
+        const cartoDark = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+        const cartoLight = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+
+        function updateMapTiles() {
+            const isLight = document.body.classList.contains('light-mode');
+            if (currentTileLayer) map.removeLayer(currentTileLayer);
+            currentTileLayer = L.tileLayer(isLight ? cartoLight : cartoDark, {
+                attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+            }).addTo(map);
+        }
+
+        updateMapTiles();
+        window.addEventListener('themeChanged', updateMapTiles);
 
         // Create a custom pane for hotspots to ensure they are clickable above the boundary
         map.createPane('hotspotPane');
@@ -630,70 +860,147 @@
                 }
             });
 
-        // Add circles for today's reports (Status: In Review, Today)
-        const todayData = JSON.parse('{{ today_data_json|escapejs }}' || '[]');
-        const circles = [];
+        // Data buckets
+        const datasets = {
+            today_active: JSON.parse('{{ today_active_json|escapejs }}' || '[]'),
+            today_resolved: JSON.parse('{{ today_resolved_json|escapejs }}' || '[]'),
+            yesterday: JSON.parse('{{ yesterday_data_json|escapejs }}' || '[]'),
+            month: JSON.parse('{{ month_data_json|escapejs }}' || '[]'),
+            year: JSON.parse('{{ year_data_json|escapejs }}' || '[]'),
+            custom: JSON.parse('{{ custom_data_json|escapejs }}' || '[]')
+        };
 
-        todayData.forEach(r => {
-            // Radius scales with count, just like the red circles
-            const radius = 80 + (r.count * 40);
+        const isCustomActive = {{ is_custom|yesno:"true,false" }};
 
-            const circle = L.circle([r.lat, r.lng], {
-                color: '#ffcc00',
-                fillColor: '#ffcc00',
+        const hotspotLayer = L.layerGroup().addTo(map);
+
+        function addHotspotMarker(item, type) {
+            const isYellow = (type === 'yellow');
+            const radius = 80 + (item.count * 40);
+            const color = isYellow ? '#ffcc00' : '#ff3333';
+            const pulseClass = isYellow ? 'pulse-yellow' : 'pulse-prone';
+
+            const circle = L.circle([item.lat, item.lng], {
+                color: color,
+                fillColor: color,
                 fillOpacity: 0.4,
                 radius: radius,
-                className: 'pulse-yellow',
+                className: pulseClass,
                 pane: 'hotspotPane',
                 interactive: true
-            }).addTo(map);
+            }).addTo(hotspotLayer);
 
             const popupContent = `
-                <div class="map-popup-header" style="color:#ba7517;"></div>
-                <div class="map-popup-text"><strong>Incident:</strong> ${r.latest_type}</div>
-                <div class="map-popup-text"><strong>Time:</strong> ${r.latest_time || 'N/A'}</div>
-                <div class="map-popup-text"><strong>Location:</strong> ${r.location_address}</div>
-                <div class="map-popup-text"><strong>Total Reports Today:</strong> ${r.count}</div>
-                <div class="map-popup-text" style="font-size: 10px; color: var(--text-tertiary); margin-top:8px;">
-                    Current Status: In Review
+                <div class="map-popup-header" style="color:${isYellow ? '#ba7517' : '#e8372c'};">
+                    ${isYellow ? '⚡ ACTIVE REPORT' : '⚠️ RESOLVED / PRONE AREA'}
                 </div>
+                <div class="map-popup-text"><strong>Location:</strong> ${item.location_address}</div>
+                ${item.latest_type ? `<div class="map-popup-text"><strong>Incident:</strong> ${item.latest_type}</div>` : ''}
+                ${item.latest_time ? `<div class="map-popup-text"><strong>Time:</strong> ${item.latest_time}</div>` : ''}
+                <div class="map-popup-text"><strong>Total Reports:</strong> ${item.count}</div>
             `;
             circle.bindPopup(popupContent);
-            circles.push(circle);
-        });
+        }
 
-        // Add circles for past prone areas (Status: In Review/Resolved, Past)
-        const proneData = JSON.parse('{{ prone_data_json|escapejs }}' || '[]');
+        function switchPeriod(period, btn) {
+            // Update UI
+            document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            document.getElementById('period-label').innerText = period;
 
-        proneData.forEach(p => {
-            const radius = 80 + (p.count * 40);
+            // Clear Map
+            hotspotLayer.clearLayers();
 
-            const circle = L.circle([p.lat, p.lng], {
-                color: '#ff3333',
-                fillColor: '#ff3333',
-                fillOpacity: 0.4,
-                radius: radius,
-                className: 'pulse-prone',
-                pane: 'hotspotPane',
-                interactive: true
-            }).addTo(map);
+            let displayData = [];
 
-            const popupContent = `
-                <div class="map-popup-header" style="color:#e8372c;">⚠️ PRONE AREA DETECTED</div>
-                <div class="map-popup-text"><strong>Location:</strong> ${p.location_address}</div>
-                <div class="map-popup-text"><strong>Incident Frequency:</strong> ${p.count} Reports</div>
-            `;
+            if (period === 'today') {
+                // Today view is a "Live Guide": 
+                // 1. Show all historical prone areas from the last year (RED)
+                datasets.year.forEach(item => {
+                    addHotspotMarker(item, 'red');
+                    displayData.push(item);
+                });
 
-            circle.bindPopup(popupContent);
-            circles.push(circle);
-        });
+                // 2. Overlay Today's Active Reports (YELLOW)
+                datasets.today_active.forEach(item => {
+                    addHotspotMarker(item, 'yellow');
+                    // If today's active is at a prone spot, the yellow pulse will overlay the red one
+                });
+            } else {
+                // Historical periods are always Red
+                datasets[period].forEach(item => {
+                    addHotspotMarker(item, 'red');
+                    displayData.push(item);
+                });
+            }
 
-        // Hotspots are added above and will be visible within the Lipa City view set by the boundary fetch
+            // Update Modal List (Top 5 for the selected context)
+            const sorted = [...displayData].sort((a, b) => b.count - a.count).slice(0, 5);
+            const listContainer = document.getElementById('prone-list-container');
+            listContainer.innerHTML = '';
+
+            if (sorted.length === 0) {
+                listContainer.innerHTML = '<div class="p-4 text-center text-muted" style="font-size: 12px;">No data for this period.</div>';
+            } else {
+                sorted.forEach((item, index) => {
+                    const row = document.createElement('div');
+                    row.className = 'prone-item';
+                    row.onclick = () => {
+                        panToProne(item.lat, item.lng);
+                        toggleModal(false);
+                    };
+                    row.innerHTML = `
+                        <div class="prone-item-info">
+                            <div class="prone-item-addr">${item.location_address}</div>
+                            <div class="prone-item-count">${item.count} Historical Incident${item.count > 1 ? 's' : ''}</div>
+                        </div>
+                        <div class="prone-item-rank">#${index + 1}</div>
+                    `;
+                    listContainer.appendChild(row);
+                });
+            }
+        }
+
+        function toggleModal(show) {
+            const modal = document.getElementById('proneModal');
+            modal.style.display = show ? 'flex' : 'none';
+        }
+
+        // Initialize
+        if (isCustomActive) {
+            switchPeriod('custom');
+        } else {
+            switchPeriod('today');
+        }
 
         function panToProne(lat, lng) {
             map.setView([lat, lng], 16);
         }
 
+    </script>
+    <script>
+        function applyTheme() {
+            const theme = localStorage.getItem('theme') || 'dark';
+            if (theme === 'light') {
+                document.body.classList.add('light-mode');
+                const themeText = document.getElementById('theme-text');
+                if (themeText) themeText.textContent = 'Dark Mode';
+            } else {
+                document.body.classList.remove('light-mode');
+                const themeText = document.getElementById('theme-text');
+                if (themeText) themeText.textContent = 'Light Mode';
+            }
+            window.dispatchEvent(new Event('themeChanged'));
+        }
+
+        function toggleTheme() {
+            const current = localStorage.getItem('theme') || 'dark';
+            const next = current === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', next);
+            applyTheme();
+        }
+
+        applyTheme();
     </script>
 </body>
 
