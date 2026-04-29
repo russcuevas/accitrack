@@ -2,13 +2,28 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from .models import Report
 from django.core.files.storage import FileSystemStorage
+from django.utils import timezone
 
 def submit_report(request):
     if request.method == 'POST':
         # Retrieve form data
         incident_date = request.POST.get('incident_date')
-        incident_time = request.POST.get('incident_time')
+        
+        # Auto-generate current time in Asia/Manila
+        try:
+            import zoneinfo
+            tz = zoneinfo.ZoneInfo('Asia/Manila')
+        except ImportError:
+            import pytz
+            tz = pytz.timezone('Asia/Manila')
+            
+        current_time = timezone.now().astimezone(tz).time()
+        incident_time = current_time.strftime('%H:%M:%S')
+
         incident_type = request.POST.get('incident_type')
+        if incident_type == 'Other':
+            incident_type = request.POST.get('other_incident_type')
+            
         latitude = request.POST.get('latitude')
         longitude = request.POST.get('longitude')
         location_address = request.POST.get('location_address')

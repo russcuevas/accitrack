@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard — Maps</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f3;
+            --bg-tertiary: #efefec;
+            --bg-info: #e6f1fb;
+            --bg-success: #eaf3de;
+            --bg-warning: #faeeda;
+            --bg-danger: #fcebeb;
+            --text-primary: #1a1a18;
+            --text-secondary: #5f5e5a;
+            --text-tertiary: #888780;
+            --text-info: #185fa5;
+            --text-success: #3b6d11;
+            --text-warning: #ba7517;
+            --text-danger: #a32d2d;
+            --border: rgba(0, 0, 0, 0.12);
+            --border-md: rgba(0, 0, 0, 0.2);
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #0d2040;
+                --bg-secondary: #0d2040;
+                --bg-tertiary: #0b1a2e;
+                --bg-info: #0c2a44;
+                --bg-success: #172a0a;
+                --bg-warning: #2a1e06;
+                --bg-danger: #2a0f0f;
+                --text-primary: #f0ede8;
+                --text-secondary: #a0a09a;
+                --text-tertiary: #6a6a64;
+                --text-info: #85b7eb;
+                --text-success: #97c459;
+                --text-warning: #fac775;
+                --text-danger: #f09595;
+                --border: rgba(255, 255, 255, 0.1);
+                --border-md: rgba(255, 255, 255, 0.18);
+            }
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .shell {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 220px;
+            min-width: 220px;
+            background: var(--bg-primary);
+            border-right: 0.5px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .logo {
+            padding: 18px 20px 14px;
+            border-bottom: 0.5px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 7px;
+            background: #185FA5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .logo-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .logo-sub {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 1px;
+        }
+
+        .nav {
+            flex: 1;
+            padding: 12px 0;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 20px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-left: 2px solid transparent;
+            transition: all 0.15s;
+            user-select: none;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--bg-info);
+            color: var(--text-info);
+            border-left-color: #185FA5;
+            font-weight: 500;
+        }
+
+        .nav-icon {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        .nav-bottom {
+            padding: 12px 0;
+            border-top: 0.5px solid var(--border);
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 20px;
+            font-size: 13px;
+            color: var(--text-danger);
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .logout-btn:hover {
+            background: var(--bg-danger);
+        }
+
+        /* Main */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .topbar {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            z-index: 1000;
+            /* over the map */
+            height: 48px;
+            background: var(--bg-primary);
+            border: 0.5px solid var(--border);
+            border-radius: var(--radius-md);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            gap: 20px;
+        }
+
+        .topbar-title {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .profile-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 10px 4px 4px;
+            border-radius: 20px;
+            border: 0.5px solid var(--border);
+            background: var(--bg-secondary);
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #185FA5;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .profile-name {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .content {
+            flex: 1;
+            padding: 0;
+            /* full width and height map */
+            position: relative;
+        }
+
+        #bigMap {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* PRONE PANEL */
+        .prone-panel {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            width: 280px;
+            background: var(--bg-primary);
+            border: 0.5px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* MAP LEGEND */
+        .map-legend {
+            position: absolute;
+            bottom: 30px;
+            left: 20px;
+            background: var(--bg-primary);
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            border: 0.5px solid var(--border);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .legend-circle {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+        }
+
+        .lc-yellow {
+            background: #ffcc00;
+            border-color: #ba7517;
+            box-shadow: 0 0 5px #ffcc00;
+        }
+
+        .lc-red {
+            background: #ff3333;
+            border-color: #a32d2d;
+            box-shadow: 0 0 5px #ff3333;
+        }
+
+        .prone-panel-header {
+            padding: 16px 20px;
+            border-bottom: 0.5px solid var(--border);
+            background: var(--bg-secondary);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .prone-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+
+        .prone-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 0.5px solid var(--border);
+        }
+
+        .prone-item:last-child {
+            border-bottom: none;
+        }
+
+        .prone-item:hover {
+            background: var(--bg-info);
+        }
+
+        .prone-item-info {
+            flex: 1;
+            margin-right: 12px;
+        }
+
+        .prone-item-addr {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .prone-item-count {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .prone-item-rank {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-warning);
+            opacity: 0.6;
+        }
+
+        .pulse-prone {
+            fill-opacity: 0.4 !important;
+            stroke-opacity: 0.8 !important;
+            stroke-width: 2px !important;
+            animation: red-pulse 1.5s infinite alternate ease-in-out !important;
+        }
+
+        .pulse-yellow {
+            fill-opacity: 0.4 !important;
+            stroke-opacity: 0.8 !important;
+            stroke-width: 2px !important;
+            animation: yellow-pulse 1.5s infinite alternate ease-in-out !important;
+        }
+
+        @keyframes red-pulse {
+            0% {
+                fill-opacity: 0.2 !important;
+                stroke-width: 2px !important;
+                filter: drop-shadow(0 0 2px rgba(232, 55, 44, 0.5));
+            }
+
+            100% {
+                fill-opacity: 0.6 !important;
+                stroke-width: 8px !important;
+                filter: drop-shadow(0 0 10px rgba(232, 55, 44, 0.8));
+            }
+        }
+
+        @keyframes yellow-pulse {
+            0% {
+                fill-opacity: 0.2 !important;
+                stroke-width: 2px !important;
+                filter: drop-shadow(0 0 2px rgba(255, 204, 0, 0.5));
+            }
+
+            100% {
+                fill-opacity: 0.6 !important;
+                stroke-width: 8px !important;
+                filter: drop-shadow(0 0 10px rgba(255, 204, 0, 0.8));
+            }
+        }
+
+        .incident-label {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #000;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            pointer-events: none;
+        }
+
+        .pulse-lipa {
+            animation: lipa-pulse 2s infinite alternate ease-in-out;
+            pointer-events: none;
+        }
+
+        @keyframes lipa-pulse {
+            0% {
+                stroke-width: 2;
+                stroke-opacity: 0.5;
+                fill-opacity: 0.05;
+                filter: drop-shadow(0 0 2px #00ff88);
+            }
+
+            100% {
+                stroke-width: 5;
+                stroke-opacity: 1;
+                fill-opacity: 0.15;
+                filter: drop-shadow(0 0 8px #00ff88);
+            }
+        }
+
+        .map-popup-header {
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .map-popup-text {
+            font-size: 12px;
+            margin-bottom: 4px;
+            color: #5f5e5a;
+        }
+
+        .btn-view {
+            display: inline-block;
+            margin-top: 6px;
+            padding: 4px 10px;
+            font-size: 11px;
+            background: #185FA5;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .btn-view:hover {
+            background: #0c2a44;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="shell">
+
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path d="M9 2L11.5 7H16.5L12.5 10.5L14 15.5L9 12.5L4 15.5L5.5 10.5L1.5 7H6.5L9 2Z"
+                            fill="white" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="logo-title">PNP Admin Portal</div>
+                    <div class="logo-sub">Accident Reports System</div>
+                </div>
+            </div>
+
+            <nav class="nav">
+                <div class="nav-item" onclick="window.location.href='/admins/dashboard/';">
+                    <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+                        <rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".7" />
+                        <rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".7" />
+                        <rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".7" />
+                        <rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".7" />
+                    </svg>
+                    Dashboard
+                </div>
+                <div class="nav-item active" onclick="window.location.href='/admins/maps/';">
+                    <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+                        <path d="M8 1c3.3 0 6 2.7 6 6 0 4.3-6 8-6 8s-6-3.7-6-8c0-3.3 2.7-6 6-6z" stroke="currentColor"
+                            stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity=".7" />
+                        <circle cx="8" cy="7" r="2" stroke="currentColor" stroke-width="1.2" opacity=".7" />
+                    </svg>
+                    Maps
+                </div>
+                <div class="nav-item" onclick="window.location.href='/admins/accounts/';">
+                    <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+                        <circle cx="8" cy="5" r="3" fill="currentColor" opacity=".7" />
+                        <path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.5"
+                            stroke-linecap="round" opacity=".7" />
+                    </svg>
+                    Accounts
+                </div>
+                <div class="nav-item">
+                    <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+                        <rect x="2" y="1" width="10" height="14" rx="1.5" stroke="currentColor" stroke-width="1.2"
+                            opacity=".7" />
+                        <path d="M5 5h6M5 8h6M5 11h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+                            opacity=".7" />
+                    </svg>
+                    Documentation
+                </div>
+                <div class="nav-item" onclick="window.location.href='/admins/incident_reports/';">
+                    <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+                        <path d="M8 2L14 13H2L8 2Z" stroke="currentColor" stroke-width="1.2" opacity=".7" />
+                        <path d="M8 7v3M8 11.5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                            opacity=".7" />
+                    </svg>
+                    Incident Reports
+                </div>
+                <div class="nav-item">
+                    <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+                        <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2" opacity=".7" />
+                        <path d="M8 5v3l2 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+                            opacity=".7" />
+                    </svg>
+                    Audit Trail
+                </div>
+            </nav>
+
+            <div class="nav-bottom">
+                <a href="/admins/logout/" class="logout-btn text-decoration-none text-dark">
+                    <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+                        <path d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h3M11 11l3-3-3-3M14 8H6" stroke="currentColor"
+                            stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    Log out
+                </a>
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="main">
+
+            <div class="content">
+                <!-- BIG MAP -->
+                <div id="bigMap"></div>
+
+                <!-- MAP LEGEND -->
+                <div class="map-legend">
+                    <div class="legend-item">
+                        <div class="legend-circle lc-yellow"></div>
+                        <span>Today's Incidents</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-circle lc-red"></div>
+                        <span>Historical Prone Areas (Resolved/Past)</span>
+                    </div>
+                </div>
+
+                <!-- PRONE PANEL (Optional Sidebar) -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        var isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var cartoDark = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+        var cartoLight = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+
+        var map = L.map('bigMap', { zoomControl: false }).setView([13.9419, 121.1644], 12);
+
+        // Move zoom control to bottom right so it doesn't overlap topbar
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+        L.tileLayer(isDark ? cartoDark : cartoLight, {
+            attribution: '&copy; OpenStreetMap &copy; CARTO'
+        }).addTo(map);
+
+        // Create a custom pane for hotspots to ensure they are clickable above the boundary
+        map.createPane('hotspotPane');
+        map.getPane('hotspotPane').style.zIndex = 650;
+        map.getPane('hotspotPane').style.pointerEvents = 'none'; // allow mouse through pane itself
+
+        // Fetch Lipa Boundary
+        fetch('https://nominatim.openstreetmap.org/search?q=Lipa,+Batangas,+Philippines&polygon_geojson=1&format=json')
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    const boundary = data.find(item => item.geojson && (item.geojson.type === 'Polygon' || item.geojson.type === 'MultiPolygon'));
+                    if (boundary) {
+                        const geoLayer = L.geoJSON(boundary.geojson, {
+                            style: {
+                                color: '#00ff88',
+                                className: 'pulse-lipa'
+                            }
+                        }).addTo(map);
+
+                        // AUTO FOCUS: Always focus the map on the Lipa City boundary to maintain the city-wide view
+                        map.fitBounds(geoLayer.getBounds(), { padding: [20, 20] });
+                    }
+                }
+            });
+
+        // Add circles for today's reports (Status: In Review, Today)
+        const todayData = JSON.parse('{{ today_data_json|escapejs }}' || '[]');
+        const circles = [];
+
+        todayData.forEach(r => {
+            // Radius scales with count, just like the red circles
+            const radius = 80 + (r.count * 40);
+
+            const circle = L.circle([r.lat, r.lng], {
+                color: '#ffcc00',
+                fillColor: '#ffcc00',
+                fillOpacity: 0.4,
+                radius: radius,
+                className: 'pulse-yellow',
+                pane: 'hotspotPane',
+                interactive: true
+            }).addTo(map);
+
+            const popupContent = `
+                <div class="map-popup-header" style="color:#ba7517;"></div>
+                <div class="map-popup-text"><strong>Incident:</strong> ${r.latest_type}</div>
+                <div class="map-popup-text"><strong>Time:</strong> ${r.latest_time || 'N/A'}</div>
+                <div class="map-popup-text"><strong>Location:</strong> ${r.location_address}</div>
+                <div class="map-popup-text"><strong>Total Reports Today:</strong> ${r.count}</div>
+                <div class="map-popup-text" style="font-size: 10px; color: var(--text-tertiary); margin-top:8px;">
+                    Current Status: In Review
+                </div>
+            `;
+            circle.bindPopup(popupContent);
+            circles.push(circle);
+        });
+
+        // Add circles for past prone areas (Status: In Review/Resolved, Past)
+        const proneData = JSON.parse('{{ prone_data_json|escapejs }}' || '[]');
+
+        proneData.forEach(p => {
+            const radius = 80 + (p.count * 40);
+
+            const circle = L.circle([p.lat, p.lng], {
+                color: '#ff3333',
+                fillColor: '#ff3333',
+                fillOpacity: 0.4,
+                radius: radius,
+                className: 'pulse-prone',
+                pane: 'hotspotPane',
+                interactive: true
+            }).addTo(map);
+
+            const popupContent = `
+                <div class="map-popup-header" style="color:#e8372c;">⚠️ PRONE AREA DETECTED</div>
+                <div class="map-popup-text"><strong>Location:</strong> ${p.location_address}</div>
+                <div class="map-popup-text"><strong>Incident Frequency:</strong> ${p.count} Reports</div>
+            `;
+
+            circle.bindPopup(popupContent);
+            circles.push(circle);
+        });
+
+        // Hotspots are added above and will be visible within the Lipa City view set by the boundary fetch
+
+        function panToProne(lat, lng) {
+            map.setView([lat, lng], 16);
+        }
+
+    </script>
+</body>
+
+</html>

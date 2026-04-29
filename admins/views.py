@@ -62,6 +62,64 @@ def dashboard(request):
 
     return render(request, 'admins/dashboard.html', context)
 
+def maps_view(request):
+    if not request.session.get('admin_id'):
+        return redirect('/admins/login/')
+        
+    from django.db.models import Count, Max
+    from django.utils import timezone
+    
+    today = timezone.now().date()
+    
+    # 1. Today's Reports (Aggregated)
+    today_reports_qs = Report.objects.filter(
+        status='In Review',
+        date_filed__date=today,
+        latitude__isnull=False,
+        longitude__isnull=False
+    )
+    today_data = list(today_reports_qs.values('location_address').annotate(
+        count=Count('id'),
+        lat=Max('latitude'),
+        lng=Max('longitude'),
+        # Get the latest incident type and time for the label/popup
+        latest_type=Max('incident_type'),
+        latest_time=Max('incident_time')
+    ))
+    
+    # 2. Past Reports (Aggregated)
+    past_reports = Report.objects.filter(
+        status__in=['In Review', 'Resolved'],
+        date_filed__date__lt=today,
+        latitude__isnull=False, 
+        longitude__isnull=False
+    )
+    prone_data = list(past_reports.values('location_address').annotate(
+        count=Count('id'),
+        lat=Max('latitude'),
+        lng=Max('longitude')
+    ).order_by('-count'))
+    
+    import json
+    for r in today_data:
+        r['lat'] = float(r['lat'])
+        r['lng'] = float(r['lng'])
+        # Convert time to string for JSON in AM/PM format
+        if r['latest_time']:
+            r['latest_time'] = r['latest_time'].strftime('%I:%M %p')
+        
+    for p in prone_data:
+        p['lat'] = float(p['lat'])
+        p['lng'] = float(p['lng'])
+        
+    context = get_admin_context(request)
+    context.update({
+        'today_data_json': json.dumps(today_data),
+        'prone_data_json': json.dumps(prone_data),
+        'top_prone_list': prone_data[:10]
+    })
+    return render(request, 'admins/maps.html', context)
+
 def prone_locations(request):
     if not request.session.get('admin_id'):
         return redirect('/admins/login/')
