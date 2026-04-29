@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AcciTrack — User Home</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500&display=swap"
+    rel="stylesheet">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    body {
+      font-family: 'Barlow', sans-serif;
+      background-color: #0b1a2e;
+      color: #dce8f5;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    .display-font {
+      font-family: 'Barlow Condensed', sans-serif;
+      letter-spacing: 0.03em;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      background-color: #0d2040;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .navbar-brand {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.4rem;
+      letter-spacing: 0.06em;
+      color: #fff !important;
+    }
+
+    .nav-link {
+      color: #8fa3c8 !important;
+      font-size: 0.9rem;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      color: #fff !important;
+    }
+
+    .btn-report-nav {
+      background: #e8372c;
+      border: none;
+      color: #fff;
+      font-family: 'Barlow Condensed', sans-serif;
+      letter-spacing: 0.05em;
+      font-size: 1rem;
+    }
+
+    .btn-report-nav:hover {
+      background: #c42d23;
+      color: #fff;
+    }
+
+    /* HERO */
+    .hero-section {
+      background: linear-gradient(135deg, #0b1a2e 0%, #0f2a4a 60%, #0d1f38 100%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 80px 0 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      right: -80px;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(232, 55, 44, 0.08), transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(232, 55, 44, 0.15);
+      color: #e8372c;
+      font-size: 0.72rem;
+      font-family: 'Barlow Condensed', sans-serif;
+      letter-spacing: 0.15em;
+      padding: 4px 12px;
+      border-radius: 3px;
+      border: 1px solid rgba(232, 55, 44, 0.3);
+      margin-bottom: 16px;
+    }
+
+    .hero-title {
+      font-size: 3.2rem;
+      line-height: 1.05;
+      color: #fff;
+    }
+
+    .hero-title span {
+      color: #e8372c;
+    }
+
+    .hero-sub {
+      color: #8fa3c8;
+      max-width: 480px;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    .btn-primary-red {
+      background: #e8372c;
+      border: none;
+      color: #fff;
+      font-family: 'Barlow Condensed', sans-serif;
+      letter-spacing: 0.05em;
+      font-size: 1.05rem;
+      padding: 10px 26px;
+    }
+
+    .btn-primary-red:hover {
+      background: #c42d23;
+      color: #fff;
+    }
+
+    .btn-outline-light-custom {
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #dce8f5;
+      background: transparent;
+      font-size: 1.05rem;
+      padding: 10px 26px;
+      font-family: 'Barlow Condensed', sans-serif;
+      letter-spacing: 0.05em;
+    }
+
+    .btn-outline-light-custom:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: #fff;
+    }
+
+    /* STAT CARDS */
+    .stat-card {
+      background: #0f2040;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 8px;
+      padding: 20px;
+      border-top: 2px solid;
+    }
+
+    .stat-val {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 2.2rem;
+      color: #fff;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      color: #5a7299;
+      font-family: 'Barlow Condensed', sans-serif;
+    }
+
+    .stat-change {
+      font-size: 0.8rem;
+    }
+
+    /* SECTION HEADERS */
+    .section-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      color: #5a7299;
+      font-family: 'Barlow Condensed', sans-serif;
+    }
+
+    .section-title {
+      font-size: 1.8rem;
+      color: #fff;
+    }
+
+    /* INCIDENT TABLE */
+    .table-dark-custom {
+      background: #0f2040;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .table-dark-custom table {
+      color: #dce8f5;
+      margin: 0;
+    }
+
+    .table-dark-custom thead th {
+      background: #0d1f38;
+      color: #5a7299;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      font-family: 'Barlow Condensed', sans-serif;
+      border-color: rgba(255, 255, 255, 0.06);
+      padding: 12px 16px;
+    }
+
+    .table-dark-custom tbody td {
+      border-color: rgba(255, 255, 255, 0.04);
+      padding: 12px 16px;
+      font-size: 0.9rem;
+      vertical-align: middle;
+    }
+
+    .table-dark-custom tbody tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+      cursor: pointer;
+    }
+
+    .inc-id {
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: #5a7299;
+    }
+
+    /* PILLS */
+    .pill {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-family: monospace;
+      padding: 2px 9px;
+      border-radius: 3px;
+      font-weight: 500;
+    }
+
+    .pill-open {
+      background: rgba(232, 55, 44, 0.15);
+      color: #e8372c;
+    }
+
+    .pill-pending {
+      background: rgba(240, 165, 0, 0.15);
+      color: #f0a500;
+    }
+
+    .pill-review {
+      background: rgba(100, 136, 200, 0.15);
+      color: #6488c8;
+    }
+
+    .pill-closed {
+      background: rgba(29, 158, 117, 0.15);
+      color: #1d9e75;
+    }
+
+    .sev-badge {
+      display: inline-flex;
+      width: 22px;
+      height: 22px;
+      border-radius: 3px;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+    }
+
+    .sev-c {
+      background: rgba(232, 55, 44, 0.2);
+      color: #e8372c;
+    }
+
+    .sev-h {
+      background: rgba(240, 165, 0, 0.2);
+      color: #f0a500;
+    }
+
+    .sev-m {
+      background: rgba(100, 136, 200, 0.2);
+      color: #6488c8;
+    }
+
+    .sev-l {
+      background: rgba(29, 158, 117, 0.2);
+      color: #1d9e75;
+    }
+
+    /* HOW IT WORKS */
+    .step-card {
+      background: #0f2040;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 8px;
+      padding: 28px 24px;
+      height: 100%;
+    }
+
+    .step-num {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 3rem;
+      color: rgba(232, 55, 44, 0.2);
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+
+    .step-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.25rem;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .step-desc {
+      font-size: 0.9rem;
+      color: #8fa3c8;
+      line-height: 1.6;
+    }
+
+    /* REPORT FORM */
+    .form-section {
+      background: #0f2040;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 8px;
+      padding: 32px;
+    }
+
+    .form-section-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      color: #5a7299;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      padding-bottom: 8px;
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      font-size: 0.85rem;
+      color: #8fa3c8;
+      margin-bottom: 5px;
+    }
+
+    .form-control,
+    .form-select {
+      background: #0b1a2e;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #dce8f5;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      background: #0b1a2e;
+      border-color: rgba(232, 55, 44, 0.5);
+      color: #dce8f5;
+      box-shadow: 0 0 0 2px rgba(232, 55, 44, 0.1);
+    }
+
+    .form-control::placeholder {
+      color: #3a5070;
+    }
+
+    .form-select option {
+      background: #0d2040;
+    }
+
+    /* SEVERITY SELECTOR */
+    .sev-option {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 14px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: #0b1a2e;
+    }
+
+    .sev-option:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .sev-option.active-crit {
+      border-color: #e8372c;
+      background: rgba(232, 55, 44, 0.08);
+    }
+
+    .sev-option.active-high {
+      border-color: #f0a500;
+      background: rgba(240, 165, 0, 0.08);
+    }
+
+    .sev-option.active-med {
+      border-color: #6488c8;
+      background: rgba(100, 136, 200, 0.08);
+    }
+
+    .sev-option.active-low {
+      border-color: #1d9e75;
+      background: rgba(29, 158, 117, 0.08);
+    }
+
+    .sev-option .sev-lbl {
+      font-size: 0.78rem;
+      margin-top: 5px;
+    }
+
+    .sev-option .sev-sub {
+      font-size: 0.68rem;
+      color: #5a7299;
+      margin-top: 2px;
+    }
+
+    /* UPLOAD ZONE */
+    .upload-zone {
+      border: 1px dashed rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      padding: 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: #0b1a2e;
+    }
+
+    .upload-zone:hover {
+      border-color: rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .upload-zone i {
+      font-size: 2rem;
+      color: #3a5070;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .upload-zone small {
+      color: #5a7299;
+      font-size: 0.78rem;
+    }
+
+    /* ALERT SUCCESS */
+    .alert-accitrack {
+      background: rgba(29, 158, 117, 0.1);
+      border: 1px solid rgba(29, 158, 117, 0.3);
+      color: #1d9e75;
+      border-radius: 6px;
+    }
+
+    /* NEWS CARDS */
+    .news-card {
+      background: #0f2040;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 8px;
+      overflow: hidden;
+      height: 100%;
+    }
+
+    .news-img {
+      height: 140px;
+      background: #0d2040;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .news-body {
+      padding: 18px;
+    }
+
+    .news-tag {
+      font-size: 0.7rem;
+      font-family: monospace;
+      letter-spacing: 0.08em;
+      color: #e8372c;
+      margin-bottom: 6px;
+    }
+
+    .news-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.1rem;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .news-meta {
+      font-size: 0.78rem;
+      color: #5a7299;
+    }
+
+    /* FOOTER */
+    footer {
+      background: #0d2040;
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .footer-brand {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.3rem;
+      color: #fff;
+    }
+
+    .footer-link {
+      color: #5a7299;
+      text-decoration: none;
+      font-size: 0.88rem;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .footer-link:hover {
+      color: #dce8f5;
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.8rem;
+      color: #3a5070;
+    }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #0b1a2e;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #1a3060;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+        AcciTrack
+      </a>
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <i class="bi bi-list text-white fs-4"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav me-auto ms-4 gap-1">
+          <li class="nav-item"><a class="nav-link active" href="#dashboard">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="#my-reports">Search Reports</a></li>
+          <li class="nav-item"><a class="nav-link" href="#how-it-works">How It Works</a></li>
+          <li class="nav-item"><a class="nav-link" href="#news">Announcements</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-3">
+          <a href="#report-form" class="btn btn-report-nav btn-sm px-3">
+            <i class="bi bi-plus-lg me-1"></i> Report Accident
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+
+
+  <!-- ===== HERO ===== -->
+  <section class="hero-section" id="dashboard">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-7">
+          <div class="hero-badge"><i class="bi bi-shield-fill me-1"></i> CITIZEN SAFETY PORTAL</div>
+          <h1 class="hero-title mb-3">Report Accidents.<br>Track <span>Every Case.</span></h1>
+          <p class="hero-sub mb-4">
+            Submit accident reports directly to local police authorities. Track the status of your case in real time and
+            help keep your community safe.
+          </p>
+          <div class="d-flex gap-3 flex-wrap">
+            <a href="#report-form" class="btn btn-primary-red">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>Submit a Report
+            </a>
+            <a href="#my-reports" class="btn btn-outline-light-custom">
+              <i class="bi bi-folder2-open me-2"></i>Search Reports
+            </a>
+          </div>
+        </div>
+        <div class="col-lg-5 mt-4 mt-lg-0">
+          <div class="row g-3">
+            <div class="col-6">
+              <div class="stat-card" style="border-top-color: #e8372c;">
+                <div class="stat-label mb-1">TOTAL INCIDENTS</div>
+                <div class="stat-val">{{ total_incidents }}</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="stat-card" style="border-top-color: #f0a500;">
+                <div class="stat-label mb-1">PENDING REVIEW</div>
+                <div class="stat-val">{{ pending_incidents }}</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="stat-card" style="border-top-color: #6488c8;">
+                <div class="stat-label mb-1">ACTIVE CASES</div>
+                <div class="stat-val">{{ active_incidents }}</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="stat-card" style="border-top-color: #1d9e75;">
+                <div class="stat-label mb-1">RESOLVED</div>
+                <div class="stat-val">{{ resolved_incidents }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Search Reports ===== -->
+  <section class="py-5" id="my-reports">
+    <div class="container">
+      <div class="d-flex align-items-end justify-content-between mb-4 flex-wrap gap-2">
+        <div>
+          <div class="section-label mb-1">CITIZEN DASHBOARD</div>
+          <h2 class="section-title mb-0">Search Reports</h2>
+        </div>
+        <a href="#report-form" class="btn btn-primary-red btn-sm">
+          <i class="bi bi-plus-lg me-1"></i> New Report
+        </a>
+      </div>
+
+      <!-- Search & filter row -->
+      <form method="GET" action="/#my-reports" class="row g-2 mb-3">
+        <div class="col-md-12">
+          <div class="input-group">
+            <span class="input-group-text" style="background:#0f2040;border-color:rgba(255,255,255,0.1);color:#5a7299">
+              <i class="bi bi-search"></i>
+            </span>
+            <input type="text" name="q" class="form-control" placeholder="Search by case number (e.g. #INCIDENT-1)..."
+              style="border-left:0" value="{{ search_query }}">
+            <button type="submit" class="btn btn-primary-red">Search</button>
+          </div>
+        </div>
+      </form>
+
+      <div class="table-dark-custom">
+        <table class="table table-borderless mb-0">
+          <thead>
+            <tr>
+              <th>CASE ID</th>
+              <th>TYPE</th>
+              <th>LOCATION</th>
+              <th>DATE FILED</th>
+              <th>STATUS</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if searched_reports %}
+            {% for report in searched_reports %}
+            <tr>
+              <td><span class="inc-id">{{ report.incident_number }}</span></td>
+              <td>{{ report.incident_type }}</td>
+              <td style="color:#8fa3c8">{{ report.location_address }}</td>
+              <td style="font-size:0.82rem;color:#5a7299">{{ report.date_filed|date:"M d, Y" }}</td>
+              <td>
+                {% if report.status == 'Pending' %}
+                <span class="pill pill-pending">PENDING</span>
+                {% elif report.status == 'Open' %}
+                <span class="pill pill-open">OPEN</span>
+                {% elif report.status == 'In Review' %}
+                <span class="pill pill-review">IN REVIEW</span>
+                {% elif report.status == 'Closed' %}
+                <span class="pill pill-closed">CLOSED</span>
+                {% else %}
+                <span class="pill" style="background:rgba(255,255,255,0.1);color:#fff;">{{ report.status|upper }}</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+              <td colspan="5" class="text-center py-4" style="color:#8fa3c8">
+                {% if search_query %}
+                No reports found matching "{{ search_query }}".
+                {% else %}
+                Enter an incident number above to check its status.
+                {% endif %}
+              </td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== HOW IT WORKS ===== -->
+  <section class="py-5" id="how-it-works"
+    style="background:#0d1f38;border-top:1px solid rgba(255,255,255,0.05);border-bottom:1px solid rgba(255,255,255,0.05)">
+    <div class="container">
+      <div class="text-center mb-5">
+        <div class="section-label mb-1">PROCESS</div>
+        <h2 class="section-title mb-2">How It Works</h2>
+        <p style="color:#8fa3c8;max-width:480px;margin:0 auto;font-size:0.95rem">Three simple steps to report an
+          accident and track your case with the local police.</p>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="step-card">
+            <div class="step-num">01</div>
+            <div class="step-title"><i class="bi bi-file-earmark-text-fill text-danger me-2"></i>Fill Out the Report
+            </div>
+            <p class="step-desc">Provide the incident details — location, time, type of accident, severity, and any
+              witness information. Attach photos or videos as evidence.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="step-card">
+            <div class="step-num">02</div>
+            <div class="step-title"><i class="bi bi-send-fill text-warning me-2"></i>Submit &amp; Receive Case ID</div>
+            <p class="step-desc">Your report is submitted directly to the police dispatch system. You'll receive a
+              unique case reference number to track your submission.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="step-card">
+            <div class="step-num">03</div>
+            <div class="step-title"><i class="bi bi-binoculars-fill me-2" style="color:#6488c8"></i>Track Case Progress
+            </div>
+            <p class="step-desc">Monitor status updates in real time — from open to in-review to closed. Get notified
+              when an officer is assigned or when your case is resolved.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== REPORT FORM ===== -->
+  <section class="py-5" id="report-form">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-9">
+          <div class="mb-4">
+            <div class="section-label mb-1">PUBLIC PORTAL</div>
+            <h2 class="section-title mb-1">Submit an Accident Report</h2>
+            <p style="color:#8fa3c8;font-size:0.92rem">All fields marked with * are required. Your submission is logged
+              and sent directly to police dispatch.</p>
+          </div>
+
+          {% if messages %}
+          {% for message in messages %}
+          <div class="alert alert-accitrack mb-4" id="successAlert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            {{ message }}
+          </div>
+          {% endfor %}
+          {% endif %}
+
+          <form method="POST" action="{% url 'submit_report' %}" enctype="multipart/form-data" class="form-section"
+            id="reportForm">
+            {% csrf_token %}
+            <!-- SECTION 1 -->
+            <div class="form-section-title">01 — INCIDENT DETAILS</div>
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
+                <label class="form-label">Date of Incident *</label>
+                <input type="date" name="incident_date" class="form-control" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Time of Incident *</label>
+                <input type="time" name="incident_time" class="form-control" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Incident Type *</label>
+                <select name="incident_type" class="form-select" required>
+                  <option value="">Select type...</option>
+                  <option>Vehicle Collision</option>
+                  <option>Pedestrian Involved</option>
+                  <option>Hit &amp; Run</option>
+                  <option>DUI / Impaired Driving</option>
+                  <option>Property Damage Only</option>
+                </select>
+              </div>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-md-12 d-flex justify-content-between align-items-end">
+                <label class="form-label mb-0" style="color: #8fa3c8; font-size: 0.85rem;">Pinpoint on Map</label>
+                <button type="button" class="btn btn-sm btn-outline-light-custom" onclick="getCurrentLocation()">
+                  <i class="bi bi-geo-alt-fill me-1"></i> Get Current Location
+                </button>
+              </div>
+              <div class="col-md-12">
+                <div id="map" style="height: 400px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.07);">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" style="color: #8fa3c8;">Longitude</label>
+                <input type="text" name="longitude" id="longitude" class="form-control" readonly
+                  style="background: #0f2040; border: 1px solid rgba(255,255,255,0.1); color: #dce8f5;">
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label" style="color: #8fa3c8;">Latitude</label>
+                <input type="text" name="latitude" id="latitude" class="form-control" readonly
+                  style="background: #0f2040; border: 1px solid rgba(255,255,255,0.1); color: #dce8f5;">
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-9">
+                <label class="form-label">Location / Address *</label>
+                <input type="text" name="location_address" class="form-control"
+                  placeholder="Street, intersection, or landmark..." required>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Vehicles Involved</label>
+                <input type="number" name="vehicles_involved" class="form-control" placeholder="0" min="0">
+              </div>
+            </div>
+
+            <hr style="border-color:rgba(255,255,255,0.07);margin:24px 0">
+
+            <!-- SECTION 2 -->
+            <div class="form-section-title">02 — SEVERITY LEVEL *</div>
+            <input type="hidden" name="severity" id="severityInput" value="Critical">
+            <div class="row g-3 mb-3">
+              <div class="col-6 col-md-3">
+                <div class="sev-option active-crit" onclick="selectSev(this,'active-crit', 'Critical')">
+                  <i class="bi bi-circle-fill text-danger d-block mb-1" style="font-size:1.4rem"></i>
+                  <div class="sev-lbl text-danger fw-semibold">Critical</div>
+                  <div class="sev-sub">Fatality / major injury</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="sev-option" onclick="selectSev(this,'active-high', 'High')">
+                  <i class="bi bi-circle-fill text-warning d-block mb-1" style="font-size:1.4rem"></i>
+                  <div class="sev-lbl text-warning fw-semibold">High</div>
+                  <div class="sev-sub">Injury / hospitalization</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="sev-option" onclick="selectSev(this,'active-med', 'Medium')">
+                  <i class="bi bi-circle-fill d-block mb-1" style="font-size:1.4rem;color:#6488c8"></i>
+                  <div class="sev-lbl fw-semibold" style="color:#6488c8">Medium</div>
+                  <div class="sev-sub">Minor injury</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="sev-option" onclick="selectSev(this,'active-low', 'Low')">
+                  <i class="bi bi-circle-fill text-success d-block mb-1" style="font-size:1.4rem"></i>
+                  <div class="sev-lbl text-success fw-semibold">Low</div>
+                  <div class="sev-sub">Property damage only</div>
+                </div>
+              </div>
+            </div>
+
+            <hr style="border-color:rgba(255,255,255,0.07);margin:24px 0">
+
+            <!-- SECTION 3 -->
+            <div class="form-section-title">03 — DESCRIPTION</div>
+            <div class="row g-3 mb-3">
+              <div class="col-12">
+                <label class="form-label">Describe what happened *</label>
+                <textarea name="description" class="form-control" rows="4"
+                  placeholder="Describe the sequence of events, vehicles involved, direction of travel, weather conditions..."
+                  required></textarea>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Vehicle Plate Number(s)</label>
+                <input type="text" name="plate_numbers" class="form-control" placeholder="e.g. ABC-1234"
+                  style="font-family:monospace">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Number of Injured Persons</label>
+                <input type="number" name="injured_count" class="form-control" placeholder="0" min="0">
+              </div>
+            </div>
+
+            <hr style="border-color:rgba(255,255,255,0.07);margin:24px 0">
+
+            <!-- SECTION 4 -->
+            <div class="form-section-title">04 — YOUR INFORMATION</div>
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Full Name *</label>
+                <input type="text" name="reporter_name" class="form-control" placeholder="Juan dela Cruz" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Contact Number *</label>
+                <input type="tel" name="contact_number" class="form-control" placeholder="+63 9xx xxx xxxx" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Email Address</label>
+                <input type="email" name="email_address" class="form-control" placeholder="juan@email.com">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Your Role in the Incident *</label>
+                <select name="reporter_role" class="form-select" required>
+                  <option value="">Select role...</option>
+                  <option>Driver / Vehicle Operator</option>
+                  <option>Pedestrian / Bystander</option>
+                  <option>Passenger</option>
+                  <option>Witness</option>
+                </select>
+              </div>
+            </div>
+
+            <hr style="border-color:rgba(255,255,255,0.07);margin:24px 0">
+
+            <!-- SECTION 5 -->
+            <div class="form-section-title">05 — EVIDENCE &amp; ATTACHMENTS</div>
+            <div class="upload-zone mb-3" id="dropZone" onclick="document.getElementById('evidenceImages').click()">
+              <i class="bi bi-cloud-arrow-up"></i>
+              <div style="color:#8fa3c8;margin-bottom:4px">Drag &amp; drop files here, or click to browse</div>
+              <small>JPG, PNG, MP4, PDF — maximum 50 MB per file</small>
+            </div>
+            <input type="file" name="evidence_images" id="evidenceImages" multiple accept="image/*" class="d-none"
+              onchange="handleFiles(this.files)">
+            <div id="imagePreviewContainer" class="d-flex flex-wrap gap-2 mb-3"></div>
+
+            <!-- TERMS -->
+            <div class="form-check mb-4">
+              <input class="form-check-input" type="checkbox" id="termsCheck" required>
+              <label class="form-check-label" for="termsCheck" style="font-size:0.85rem;color:#8fa3c8">
+                I certify that the information provided is true and accurate to the best of my knowledge. I understand
+                that filing a false report is a criminal offense.
+              </label>
+            </div>
+
+            <!-- BUTTONS -->
+            <div class="d-flex justify-content-end gap-3 flex-wrap">
+              <button type="submit" class="btn btn-primary-red px-4">
+                <i class="bi bi-send-fill me-2"></i> Submit Report
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== NEWS / ANNOUNCEMENTS ===== -->
+  <section class="py-5" id="news" style="background:#0d1f38;border-top:1px solid rgba(255,255,255,0.05)">
+    <div class="container">
+      <div class="d-flex align-items-end justify-content-between mb-4">
+        <div>
+          <div class="section-label mb-1">UPDATES</div>
+          <h2 class="section-title mb-0">Announcements</h2>
+        </div>
+        <a href="#" style="color:#e8372c;font-size:0.88rem;text-decoration:none">View all <i
+            class="bi bi-arrow-right"></i></a>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="news-card">
+            <div class="news-img">🚨</div>
+            <div class="news-body">
+              <div class="news-tag">SAFETY ADVISORY</div>
+              <div class="news-title">High accident zones identified in Metro area</div>
+              <p style="font-size:0.85rem;color:#8fa3c8;line-height:1.6">Authorities have flagged 5 intersections with
+                elevated accident frequency this quarter. Extra patrols have been deployed.</p>
+              <div class="news-meta"><i class="bi bi-calendar3 me-1"></i>Apr 12, 2026</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="news-card">
+            <div class="news-img">📋</div>
+            <div class="news-body">
+              <div class="news-tag">SYSTEM UPDATE</div>
+              <div class="news-title">New real-time case tracking now available</div>
+              <p style="font-size:0.85rem;color:#8fa3c8;line-height:1.6">Citizens can now receive SMS and email
+                notifications when their submitted reports are updated by assigned officers.</p>
+              <div class="news-meta"><i class="bi bi-calendar3 me-1"></i>Apr 8, 2026</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="news-card">
+            <div class="news-img">🛡️</div>
+            <div class="news-body">
+              <div class="news-tag">REMINDER</div>
+              <div class="news-title">Filing a false report is a punishable offense</div>
+              <p style="font-size:0.85rem;color:#8fa3c8;line-height:1.6">The PNP reminds citizens that submitting false
+                accident reports is a criminal act under RA 10951 and may result in prosecution.</p>
+              <div class="news-meta"><i class="bi bi-calendar3 me-1"></i>Apr 1, 2026</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="py-5">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <span class="footer-brand">AcciTrack</span>
+          </div>
+          <p style="color:#5a7299;font-size:0.85rem;line-height:1.7">A citizen safety reporting system operated by the
+            Philippine National Police. Available 24/7 for emergency incident reporting.</p>
+        </div>
+        <div class="col-md-2">
+          <div class="section-label mb-3">PORTAL</div>
+          <a href="#dashboard" class="footer-link">Dashboard</a>
+          <a href="#my-reports" class="footer-link">Search Reports</a>
+          <a href="#report-form" class="footer-link">Submit Report</a>
+          <a href="#news" class="footer-link">Announcements</a>
+        </div>
+        <div class="col-md-2">
+          <div class="section-label mb-3">HELP</div>
+          <a href="#" class="footer-link">FAQs</a>
+          <a href="#" class="footer-link">Contact Police</a>
+          <a href="#" class="footer-link">Emergency Hotlines</a>
+          <a href="#" class="footer-link">Privacy Policy</a>
+        </div>
+        <div class="col-md-4">
+          <div class="section-label mb-3">EMERGENCY HOTLINES</div>
+          <div class="d-flex flex-column gap-2">
+            <div
+              style="background:#0f2040;border:1px solid rgba(255,255,255,0.07);border-radius:6px;padding:10px 14px;">
+              <div style="font-size:0.7rem;color:#5a7299;font-family:monospace">PNP HOTLINE</div>
+              <div style="font-size:1.1rem;font-family:'Barlow Condensed',sans-serif;color:#fff">117</div>
+            </div>
+            <div
+              style="background:#0f2040;border:1px solid rgba(255,255,255,0.07);border-radius:6px;padding:10px 14px;">
+              <div style="font-size:0.7rem;color:#5a7299;font-family:monospace">EMERGENCY</div>
+              <div style="font-size:1.1rem;font-family:'Barlow Condensed',sans-serif;color:#fff">911</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom mt-5 pt-4 d-flex justify-content-between flex-wrap gap-2">
+        <span>&copy; 2026 AcciTrack &mdash; Philippine National Police. All rights reserved.</span>
+        <span>Powered by AcciTrack v2.4.1</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    function selectSev(el, cls, val) {
+      document.querySelectorAll('.sev-option').forEach(o => {
+        o.className = 'sev-option';
+      });
+      el.classList.add(cls);
+      document.getElementById('severityInput').value = val;
+    }
+
+    // Initialize map
+    var map = L.map('map').setView([14.5995, 120.9842], 13);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 20
+    }).addTo(map);
+
+    // ✅ CREATE MARKER VARIABLE (important)
+    var marker;
+
+    // Handle map clicks
+    map.on('click', function (e) {
+      var lat = e.latlng.lat.toFixed(6);
+      var lng = e.latlng.lng.toFixed(6);
+      updateLocationFromCoords(lat, lng);
+    });
+
+    function updateLocationFromCoords(lat, lng) {
+      document.getElementById('latitude').value = lat;
+      document.getElementById('longitude').value = lng;
+
+      const latlng = [lat, lng];
+      if (marker) {
+        marker.setLatLng(latlng);
+      } else {
+        marker = L.marker(latlng).addTo(map);
+      }
+      map.setView(latlng, 15);
+
+      const addressInput = document.querySelector('input[name="location_address"]');
+      addressInput.placeholder = "Fetching address...";
+
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data && data.display_name) {
+            addressInput.value = data.display_name;
+          } else {
+            addressInput.placeholder = "Address not found. Please enter manually.";
+            addressInput.value = "";
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching address:", error);
+          addressInput.placeholder = "Error fetching address. Please enter manually.";
+        });
+    }
+
+    function getCurrentLocation() {
+      if (navigator.geolocation) {
+        document.querySelector('input[name="location_address"]').placeholder = "Requesting location permission...";
+        navigator.geolocation.getCurrentPosition(function (position) {
+          const lat = position.coords.latitude.toFixed(6);
+          const lng = position.coords.longitude.toFixed(6);
+          updateLocationFromCoords(lat, lng);
+        }, function (error) {
+          alert("Error getting location: " + error.message);
+          document.querySelector('input[name="location_address"]').placeholder = "Street, intersection, or landmark...";
+        });
+      } else {
+        alert("Geolocation is not supported by this browser.");
+      }
+    }
+
+    // ===== IMAGE UPLOAD & PREVIEW =====
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('evidenceImages');
+    const previewContainer = document.getElementById('imagePreviewContainer');
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, () => dropZone.style.borderColor = '#e8372c', false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, () => dropZone.style.borderColor = 'rgba(255, 255, 255, 0.12)', false);
+    });
+
+    dropZone.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      fileInput.files = dt.files;
+      handleFiles(dt.files);
+    }
+
+    function handleFiles(files) {
+      previewContainer.innerHTML = '';
+      [...files].forEach(previewFile);
+    }
+
+    function previewFile(file) {
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onloadend = function () {
+          const img = document.createElement('img');
+          img.src = reader.result;
+          img.style.width = '80px';
+          img.style.height = '80px';
+          img.style.objectFit = 'cover';
+          img.style.borderRadius = '6px';
+          img.style.border = '1px solid rgba(255,255,255,0.2)';
+          previewContainer.appendChild(img);
+        }
+      }
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+  <style>
+    @keyframes pulseOpacity {
+      0% {
+        fill-opacity: 0.3;
+        stroke-width: 2;
+      }
+
+      50% {
+        fill-opacity: 0.6;
+        stroke-width: 5;
+      }
+
+      100% {
+        fill-opacity: 0.3;
+        stroke-width: 2;
+      }
+    }
+
+    .pulse-circle {
+      animation: pulseOpacity 2s infinite alternate ease-in-out;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f5f5f3;
+      --bg-tertiary: #efefec;
+      --bg-info: #e6f1fb;
+      --bg-success: #eaf3de;
+      --bg-warning: #faeeda;
+      --bg-danger: #fcebeb;
+      --text-primary: #1a1a18;
+      --text-secondary: #5f5e5a;
+      --text-tertiary: #888780;
+      --text-info: #185fa5;
+      --text-success: #3b6d11;
+      --text-warning: #ba7517;
+      --text-danger: #a32d2d;
+      --border: rgba(0, 0, 0, 0.12);
+      --border-md: rgba(0, 0, 0, 0.2);
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-primary: #0d2040;
+        --bg-secondary: #0d2040;
+        --bg-tertiary: #0b1a2e;
+        --bg-info: #0c2a44;
+        --bg-success: #172a0a;
+        --bg-warning: #2a1e06;
+        --bg-danger: #2a0f0f;
+        --text-primary: #f0ede8;
+        --text-secondary: #a0a09a;
+        --text-tertiary: #6a6a64;
+        --text-info: #85b7eb;
+        --text-success: #97c459;
+        --text-warning: #fac775;
+        --text-danger: #f09595;
+        --border: rgba(255, 255, 255, 0.1);
+        --border-md: rgba(255, 255, 255, 0.18);
+      }
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .shell {
+      display: flex;
+      height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      min-width: 220px;
+      background: var(--bg-primary);
+      border-right: 0.5px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logo {
+      padding: 18px 20px 14px;
+      border-bottom: 0.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 7px;
+      background: #185FA5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .logo-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .logo-sub {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 1px;
+    }
+
+    .nav {
+      flex: 1;
+      padding: 12px 0;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 20px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-left: 2px solid transparent;
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    .nav-item.active {
+      background: var(--bg-info);
+      color: var(--text-info);
+      border-left-color: #185FA5;
+      font-weight: 500;
+    }
+
+    .nav-icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .nav-bottom {
+      padding: 12px 0;
+      border-top: 0.5px solid var(--border);
+    }
+
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 20px;
+      font-size: 13px;
+      color: var(--text-danger);
+      cursor: pointer;
+    }
+
+    .logout-btn:hover {
+      background: var(--bg-danger);
+    }
+
+    /* Main */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .topbar {
+      height: 56px;
+      background: var(--bg-primary);
+      border-bottom: 0.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      flex-shrink: 0;
+    }
+
+    .topbar-title {
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .notif-btn {
+      position: relative;
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius-md);
+      border: 0.5px solid var(--border);
+      background: var(--bg-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .notif-dot {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #E24B4A;
+      border: 1.5px solid var(--bg-primary);
+    }
+
+    .profile-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px 4px 4px;
+      border-radius: 20px;
+      border: 0.5px solid var(--border);
+      background: var(--bg-secondary);
+      cursor: pointer;
+    }
+
+    .avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #185FA5;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .profile-name {
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    /* Pages */
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+
+    /* Stats row */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .stat-val {
+      font-size: 22px;
+      font-weight: 500;
+    }
+
+    .stat-sub {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 3px;
+    }
+
+    /* Cards */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .card {
+      background: var(--bg-primary);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    /* Badges */
+    .badge {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-weight: 500;
+    }
+
+    .badge-blue {
+      background: var(--bg-info);
+      color: var(--text-info);
+    }
+
+    .badge-red {
+      background: var(--bg-danger);
+      color: var(--text-danger);
+    }
+
+    .badge-green {
+      background: var(--bg-success);
+      color: var(--text-success);
+    }
+
+    .badge-amber {
+      background: var(--bg-warning);
+      color: var(--text-warning);
+    }
+
+    .badge-gray {
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+    }
+
+    /* Case info grid */
+    .case-info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+
+    .info-row {
+      padding: 7px 0;
+      border-bottom: 0.5px solid var(--border);
+    }
+
+    .info-row:nth-child(5),
+    .info-row:nth-child(6) {
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-bottom: 2px;
+    }
+
+    .info-val {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    /* Map */
+    .map-box {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-md);
+      height: 160px;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .map-road-h {
+      position: absolute;
+      left: 0;
+      right: 0;
+    }
+
+    .map-road-v {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+    }
+
+    .map-pin {
+      position: absolute;
+      transform: translate(-50%, -50%);
+    }
+
+    .map-pin-inner {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #E24B4A;
+      border: 2.5px solid #fff;
+      margin: 2px;
+    }
+
+    .map-label {
+      font-size: 10px;
+      color: var(--text-primary);
+      background: var(--bg-primary);
+      padding: 2px 5px;
+      border-radius: 4px;
+      border: 0.5px solid var(--border);
+      position: absolute;
+      white-space: nowrap;
+    }
+
+    /* Parties */
+    .party-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .party-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-md);
+    }
+
+    .party-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    .party-name {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .party-role {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    /* History */
+    .history-list {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .history-item {
+      display: flex;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 0.5px solid var(--border);
+    }
+
+    .history-item:last-child {
+      border-bottom: none;
+    }
+
+    .h-dot-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 4px;
+    }
+
+    .h-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .h-line {
+      width: 1px;
+      flex: 1;
+      background: var(--border);
+      margin-top: 4px;
+    }
+
+    .h-time {
+      font-size: 11px;
+      color: var(--text-secondary);
+      min-width: 80px;
+    }
+
+    .h-text {
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .h-officer {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    /* Action buttons */
+    .action-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      padding: 7px 14px;
+      border-radius: var(--radius-md);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 0.5px solid var(--border-md);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      transition: all 0.15s;
+    }
+
+    .btn:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .btn-edit {
+      background: var(--bg-info);
+      color: var(--text-info);
+      border-color: rgba(24, 95, 165, 0.3);
+    }
+
+    .btn-edit:hover {
+      opacity: 0.85;
+    }
+
+    /* Table */
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      padding: 10px 12px;
+      border-bottom: 0.5px solid var(--border);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 12px;
+      border-bottom: 0.5px solid var(--border);
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: var(--bg-secondary);
+    }
+
+    /* Search bar */
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .search-bar input,
+    .filter-select {
+      padding: 8px 12px;
+      border-radius: var(--radius-md);
+      border: 0.5px solid var(--border);
+      background: var(--bg-secondary);
+      font-size: 13px;
+      color: var(--text-primary);
+      font-family: var(--font);
+    }
+
+    .search-bar input {
+      flex: 1;
+    }
+
+    /* Audit */
+    .audit-entry {
+      display: flex;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 0.5px solid var(--border);
+    }
+
+    .audit-entry:last-child {
+      border-bottom: none;
+    }
+
+    .audit-time-col {
+      min-width: 80px;
+    }
+
+    .audit-time {
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .audit-date {
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+
+    .audit-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .audit-action {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .audit-detail {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 3px;
+      line-height: 1.4;
+    }
+
+    a.link {
+      color: var(--text-info);
+      text-decoration: none;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    a.link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="shell">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M9 2L11.5 7H16.5L12.5 10.5L14 15.5L9 12.5L4 15.5L5.5 10.5L1.5 7H6.5L9 2Z" fill="white" />
+          </svg>
+        </div>
+        <div>
+          <div class="logo-title">PNP Admin Portal</div>
+          <div class="logo-sub">Accident Reports System</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <div class="nav-item active" onclick="window.location.href='/admins/dashboard/';">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+            <rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".7" />
+            <rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".7" />
+            <rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".7" />
+            <rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".7" />
+          </svg>
+          Dashboard
+        </div>
+        <div class="nav-item" onclick="window.location.href='/admins/accounts/';">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="5" r="3" fill="currentColor" opacity=".7" />
+            <path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+              opacity=".7" />
+          </svg>
+          Accounts
+        </div>
+        <div class="nav-item" onclick="showPage('documentation', this)">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+            <rect x="2" y="1" width="10" height="14" rx="1.5" stroke="currentColor" stroke-width="1.2" opacity=".7" />
+            <path d="M5 5h6M5 8h6M5 11h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+              opacity=".7" />
+          </svg>
+          Documentation
+        </div>
+        <div class="nav-item" onclick="window.location.href='/admins/incident_reports/';">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+            <path d="M8 2L14 13H2L8 2Z" stroke="currentColor" stroke-width="1.2" opacity=".7" />
+            <path d="M8 7v3M8 11.5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".7" />
+          </svg>
+          Incident Reports
+        </div>
+        <div class="nav-item" onclick="showPage('audit', this)">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2" opacity=".7" />
+            <path d="M8 5v3l2 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity=".7" />
+          </svg>
+          Audit Trail
+        </div>
+      </nav>
+
+      <div class="nav-bottom">
+        <a href="/admins/logout/" class="logout-btn text-decoration-none text-dark">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+            <path d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h3M11 11l3-3-3-3M14 8H6" stroke="currentColor" stroke-width="1.3"
+              stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          Log out
+        </a>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main">
+      <div class="topbar">
+        <div class="topbar-title">Dashboard / Analytics</div>
+        <div class="topbar-right">
+          <div class="profile-pill">
+            <div class="avatar">{% if admin_name %}{{ admin_name|slice:":1" }}{% else %}A{% endif %}</div>
+            <div style="display: flex; flex-direction: column;">
+              <span class="profile-name" style="line-height: 1.1;">{{ admin_name|default:"Admin" }}</span>
+              <span
+                style="font-size: 10px; color: var(--text-tertiary); font-weight: 600; text-transform: uppercase;">{{admin_rank|default:"P/Cpl"}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+
+        <!-- ===== DASHBOARD ===== -->
+        <div class="page active" id="page-dashboard">
+          <div class="stats-row">
+            <div class="stat-card">
+              <div class="stat-label">Total Cases</div>
+              <div class="stat-val">{{ total_cases }}</div>
+              <div class="stat-sub">Lifetime reports</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Pending Review</div>
+              <div class="stat-val" style="color:#E24B4A">{{ open_cases }}</div>
+              <div class="stat-sub">Needs attention</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Resolved</div>
+              <div class="stat-val" style="color:#3B6D11">{{ resolved_cases }}</div>
+              <div class="stat-sub">Cases completed</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">System Officers</div>
+              <div class="stat-val">{{ total_officers }}</div>
+              <div class="stat-sub">Registered accounts</div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom: 16px;">
+            <div class="card-header">
+              <div class="card-title"
+                style="font-size: 15px; color: var(--text-danger); display: flex; align-items: center; gap: 8px;">
+                <span
+                  style="display:inline-block; width:10px; height:10px; background:var(--bg-danger); border: 2px solid var(--text-danger); border-radius:50%; box-shadow: 0 0 6px var(--text-danger);"></span>
+                Real Time Pending Accident
+              </div>
+            </div>
+            <div id="pendingMap" style="height: 350px; border-radius: var(--radius-md); z-index: 1;"></div>
+          </div>
+
+          <div class="two-col">
+            <!-- Incident Type Pie Chart -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Incident Type Distribution</div>
+              </div>
+              <div style="height: 250px; display: flex; justify-content: center;">
+                <canvas id="incidentTypeChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Severity Bar Chart -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Severity Level</div>
+              </div>
+              <div style="height: 250px;">
+                <canvas id="severityChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Top Reports Incident - Top 5 Prone Areas</div>
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <span class="badge badge-red">High Risk</span>
+                <a href="{% url 'admins:prone_locations' %}" class="link" style="font-size: 11px;">View more</a>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Location / Address</th>
+                    <th>Incident Count</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for area in prone_areas %}
+                  <tr>
+                    <td>#{{ forloop.counter }}</td>
+                    <td style="font-weight: 500;">{{ area.location_address }}</td>
+                    <td><span class="badge badge-amber">{{ area.count }} Incident{{ area.count|pluralize }}</span></td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="3" style="text-align:center;">No incidents reported yet.</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+
+
+        <!-- ===== DOCUMENTATION ===== -->
+        <div class="page" id="page-documentation">
+          <div class="section-title">Accident Documentation</div>
+          <div class="search-bar">
+            <input type="text" placeholder="Search documents by case number or description...">
+            <select class="filter-select">
+              <option>All Types</option>
+              <option>Photo</option>
+              <option>Sketch</option>
+              <option>Medical</option>
+              <option>Report</option>
+            </select>
+            <button class="btn btn-edit" onclick="alert('Open file upload...')">+ Upload</button>
+          </div>
+          <div class="card" style="padding:0;">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Doc ID</th>
+                    <th>Case No.</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                    <th>Uploaded By</th>
+                    <th>Date</th>
+                    <th>File</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>DOC-0841</td>
+                    <td>#ACC-2025-0047</td>
+                    <td><span class="badge badge-blue">Photo</span></td>
+                    <td>Scene overview — 12 photos</td>
+                    <td>P/Sgt Santos</td>
+                    <td>Apr 15, 2026</td>
+                    <td><a class="link">photos_0047.zip</a></td>
+                    <td><a class="link">View</a> · <a class="link" style="color:var(--text-danger);">Delete</a></td>
+                  </tr>
+                  <tr>
+                    <td>DOC-0840</td>
+                    <td>#ACC-2025-0047</td>
+                    <td><span class="badge badge-amber">Sketch</span></td>
+                    <td>Road sketch diagram</td>
+                    <td>P/Cpl Dela Cruz</td>
+                    <td>Apr 14, 2026</td>
+                    <td><a class="link">sketch_0047.pdf</a></td>
+                    <td><a class="link">View</a> · <a class="link" style="color:var(--text-danger);">Delete</a></td>
+                  </tr>
+                  <tr>
+                    <td>DOC-0838</td>
+                    <td>#ACC-2025-0044</td>
+                    <td><span class="badge badge-green">Medical</span></td>
+                    <td>Medical certificate — victim</td>
+                    <td>P/Sgt Santos</td>
+                    <td>Apr 12, 2026</td>
+                    <td><a class="link">medcert_0044.pdf</a></td>
+                    <td><a class="link">View</a> · <a class="link" style="color:var(--text-danger);">Delete</a></td>
+                  </tr>
+                  <tr>
+                    <td>DOC-0835</td>
+                    <td>#ACC-2025-0041</td>
+                    <td><span class="badge badge-gray">Report</span></td>
+                    <td>Initial investigation report</td>
+                    <td>Lt. Bernardo</td>
+                    <td>Apr 10, 2026</td>
+                    <td><a class="link">report_0041.docx</a></td>
+                    <td><a class="link">View</a> · <a class="link" style="color:var(--text-danger);">Delete</a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- ===== AUDIT TRAIL ===== -->
+        <div class="page" id="page-audit">
+          <div class="section-title">Audit Trail Log</div>
+          <div class="search-bar">
+            <input type="text" placeholder="Search by officer, case, or action...">
+            <select class="filter-select">
+              <option>All Actions</option>
+              <option>Create</option>
+              <option>Edit</option>
+              <option>Delete</option>
+              <option>Login</option>
+            </select>
+          </div>
+          <div class="card">
+            <div class="audit-entry">
+              <div class="audit-time-col">
+                <div class="audit-time">10:24 AM</div>
+                <div class="audit-date">Apr 16, 2026</div>
+              </div>
+              <div class="audit-icon" style="background:var(--bg-info);color:var(--text-info);">✎</div>
+              <div>
+                <div class="audit-action">Case edited</div>
+                <div class="audit-detail">P/Sgt Santos modified case #ACC-2025-0047 — updated status to "Under Review"
+                </div>
+              </div>
+            </div>
+            <div class="audit-entry">
+              <div class="audit-time-col">
+                <div class="audit-time">09:58 AM</div>
+                <div class="audit-date">Apr 16, 2026</div>
+              </div>
+              <div class="audit-icon" style="background:var(--bg-success);color:var(--text-success);">↑</div>
+              <div>
+                <div class="audit-action">Document uploaded</div>
+                <div class="audit-detail">P/Sgt Santos uploaded photos_0047.zip to case #ACC-2025-0047</div>
+              </div>
+            </div>
+            <div class="audit-entry">
+              <div class="audit-time-col">
+                <div class="audit-time">09:12 AM</div>
+                <div class="audit-date">Apr 16, 2026</div>
+              </div>
+              <div class="audit-icon" style="background:var(--bg-secondary);color:var(--text-secondary);">→</div>
+              <div>
+                <div class="audit-action">Login</div>
+                <div class="audit-detail">P/Cpl Dela Cruz logged in from 192.168.1.14 — Station 6 Terminal</div>
+              </div>
+            </div>
+            <div class="audit-entry">
+              <div class="audit-time-col">
+                <div class="audit-time">08:55 AM</div>
+                <div class="audit-date">Apr 16, 2026</div>
+              </div>
+              <div class="audit-icon" style="background:var(--bg-secondary);color:var(--text-secondary);">→</div>
+              <div>
+                <div class="audit-action">Login</div>
+                <div class="audit-detail">P/Sgt Santos logged in from 192.168.1.11 — Station 6 Terminal</div>
+              </div>
+            </div>
+            <div class="audit-entry">
+              <div class="audit-time-col">
+                <div class="audit-time">Apr 15</div>
+                <div class="audit-date">2026</div>
+              </div>
+              <div class="audit-icon" style="background:var(--bg-danger);color:var(--text-danger);">✕</div>
+              <div>
+                <div class="audit-action">Case closed</div>
+                <div class="audit-detail">Lt. Bernardo closed case #ACC-2025-0043 and marked as resolved</div>
+              </div>
+            </div>
+            <div class="audit-entry">
+              <div class="audit-time-col">
+                <div class="audit-time">Apr 14</div>
+                <div class="audit-date">2026</div>
+              </div>
+              <div class="audit-icon" style="background:var(--bg-success);color:var(--text-success);">+</div>
+              <div>
+                <div class="audit-action">New case created</div>
+                <div class="audit-detail">P/Cpl Dela Cruz filed new incident report — case #ACC-2025-0047</div>
+              </div>
+            </div>
+            <div class="audit-entry">
+              <div class="audit-time-col">
+                <div class="audit-time">Apr 12</div>
+                <div class="audit-date">2026</div>
+              </div>
+              <div class="audit-icon" style="background:var(--bg-info);color:var(--text-info);">✎</div>
+              <div>
+                <div class="audit-action">Account updated</div>
+                <div class="audit-detail">Admin updated rank of PNP-0038 Santos from P/Cpl to P/Sgt</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /content -->
+    </div><!-- /main -->
+  </div><!-- /shell -->
+
+  <script>
+    const pageTitles = {
+      dashboard: 'Dashboard — Case Overview',
+      documentation: 'Documentation — All Files',
+      audit: 'Audit Trail Log'
+    };
+
+    function showPage(id, el) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById('page-' + id).classList.add('active');
+      el.classList.add('active');
+      document.getElementById('page-title').textContent = pageTitles[id];
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  {% if messages %}
+  {% for message in messages %}
+  {% if 'welcome' in message.tags %}
+  <script>
+    Swal.fire({
+      icon: 'success',
+      title: 'Welcome',
+      text: '{{ message }}',
+      timer: 2000,
+      showConfirmButton: false
+    });
+  </script>
+  {% endif %}
+  {% endfor %}
+  {% endif %}
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="application/json" id="incident-data">
+    {{ incident_type_data|safe }}
+  </script>
+  <script type="application/json" id="severity-data">
+    {{ severity_data|safe }}
+  </script>
+  <script type="application/json" id="pending-data">
+    {{ pending_incidents_data|safe }}
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const incidentData = JSON.parse(document.getElementById('incident-data').textContent);
+      const severityData = JSON.parse(document.getElementById('severity-data').textContent);
+      const pendingIncidents = JSON.parse(document.getElementById('pending-data').textContent);
+
+      // Real-time Pending Accident Map
+      if (document.getElementById('pendingMap')) {
+        const map = L.map('pendingMap').setView([14.5995, 120.9842], 12);
+
+        // Use a light map tile that supports dark mode overlay well, or carto voyager
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+          attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+        }).addTo(map);
+
+        if (pendingIncidents && pendingIncidents.length > 0) {
+          const bounds = [];
+          pendingIncidents.forEach(incident => {
+            if (incident.latitude && incident.longitude) {
+              bounds.push([incident.latitude, incident.longitude]);
+
+              // Pulsing affected area style via standard leaflet circle
+              L.circle([incident.latitude, incident.longitude], {
+                radius: 50, // 250 meters coverage area
+                fillColor: "#E24B4A",
+                color: "#E24B4A",
+                weight: 3,
+                opacity: 0.9,
+                fillOpacity: 0.4,
+                className: 'pulse-circle'
+              }).addTo(map)
+                .bindPopup(`
+                  <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                    <div style="font-weight: 600; font-size: 13px; color: #E24B4A;">${incident.incident_number || 'New Incident'}</div>
+                    <div style="font-size: 12px; margin-top: 4px;"><strong>Type:</strong> ${incident.incident_type}</div>
+                    <div style="font-size: 11px; color: #5f5e5a; margin-top: 2px; margin-bottom: 8px;">${incident.location_address}</div>
+                    <button onclick="window.locateIncident(${incident.latitude}, ${incident.longitude})" style="background:#185FA5; color:#fff; border:none; padding:6px 8px; border-radius:4px; font-size:11px; font-weight: 600; cursor:pointer; width:100%; transition: opacity 0.2s;">📍 Locate Incident</button>
+                  </div>
+                `);
+            }
+          });
+          if (bounds.length > 0) {
+            map.fitBounds(bounds, { padding: [50, 50] });
+          }
+        }
+
+        // Add Fullscreen Control
+        const fsControl = L.control({ position: 'topright' });
+        fsControl.onAdd = function () {
+          const div = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+          div.innerHTML = `<a href="#" title="Toggle Fullscreen" style="display:flex; align-items:center; justify-content:center; background:var(--bg-primary); width:34px; height:34px; text-decoration:none; color:var(--text-primary); border-radius:4px;">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M1.5 1h4a.5.5 0 010 1h-3v3a.5.5 0 01-1 0v-4zM10.5 1h4v4a.5.5 0 01-1 0v-3h-3a.5.5 0 010-1zM1.5 15h4a.5.5 0 000-1h-3v-3a.5.5 0 00-1 0v4zM10.5 15h4v-4a.5.5 0 00-1 0v3h-3a.5.5 0 000 1z"/>
+            </svg>
+          </a>`;
+          div.onclick = function (e) {
+            e.preventDefault();
+            const elem = document.getElementById('pendingMap');
+            if (!document.fullscreenElement) {
+              elem.requestFullscreen().catch(err => {
+                console.error('Error attempting to enable full-screen mode:', err);
+              });
+            } else {
+              document.exitFullscreen();
+            }
+          };
+          return div;
+        };
+        fsControl.addTo(map);
+
+        // Tracker Logic for Dashboard
+        let userMarker = null;
+        let routingControl = null;
+        let watchId = null;
+
+        const distanceControl = L.control({ position: 'bottomleft' });
+        distanceControl.onAdd = function () {
+          this._div = L.DomUtil.create('div', 'distance-info');
+          this._div.style.backgroundColor = 'var(--bg-primary)';
+          this._div.style.padding = '8px 12px';
+          this._div.style.borderRadius = 'var(--radius-md)';
+          this._div.style.border = '1px solid var(--border)';
+          this._div.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
+          this._div.style.fontWeight = '600';
+          this._div.style.fontSize = '12px';
+          this._div.style.color = 'var(--text-primary)';
+          this._div.style.display = 'none';
+          return this._div;
+        };
+        distanceControl.update = function (km, mins) {
+          this._div.style.display = 'block';
+          this._div.innerHTML = `📍 Route: <span style="color:#E24B4A; font-size: 14px; font-weight: 700;">${km} km</span><br><small style="color:var(--text-secondary); margin-left:18px;">ETA: ~${mins} mins</small>`;
+        };
+        distanceControl.addTo(map);
+
+        window.locateIncident = function (targetLat, targetLng) {
+          distanceControl._div.style.display = 'block';
+          distanceControl._div.innerHTML = 'Locating you...';
+
+          if ("geolocation" in navigator) {
+            // Clear any existing tracker to switch to the new incident
+            if (watchId) navigator.geolocation.clearWatch(watchId);
+
+            watchId = navigator.geolocation.watchPosition(function (position) {
+              const userLat = position.coords.latitude;
+              const userLng = position.coords.longitude;
+
+              if (!userMarker) {
+                userMarker = L.circleMarker([userLat, userLng], {
+                  radius: 8,
+                  fillColor: "#185FA5",
+                  color: "#fff",
+                  weight: 2,
+                  opacity: 1,
+                  fillOpacity: 0.9
+                }).addTo(map).bindPopup("<b>Your Location</b>");
+              } else {
+                userMarker.setLatLng([userLat, userLng]);
+              }
+
+              if (!routingControl) {
+                routingControl = L.Routing.control({
+                  waypoints: [
+                    L.latLng(userLat, userLng),
+                    L.latLng(targetLat, targetLng)
+                  ],
+                  routeWhileDragging: false,
+                  addWaypoints: false,
+                  fitSelectedRoutes: true,
+                  show: false,
+                  lineOptions: {
+                    styles: [{ color: '#185FA5', opacity: 0.7, weight: 6 }]
+                  },
+                  createMarker: function () { return null; }
+                }).addTo(map);
+
+                routingControl.on('routesfound', function (e) {
+                  const summary = e.routes[0].summary;
+                  const distanceKm = (summary.totalDistance / 1000).toFixed(2);
+                  const timeMins = Math.round(summary.totalTime / 60);
+                  distanceControl.update(distanceKm, timeMins);
+                });
+              } else {
+                routingControl.setWaypoints([
+                  L.latLng(userLat, userLng),
+                  L.latLng(targetLat, targetLng)
+                ]);
+              }
+            }, function (error) {
+              console.warn('Geolocation error:', error);
+              distanceControl._div.innerHTML = '⚠️ Location failed';
+            }, {
+              enableHighAccuracy: true,
+              maximumAge: 5000,
+              timeout: 5000
+            });
+          } else {
+            distanceControl._div.innerHTML = '⚠️ Geolocation not supported';
+          }
+        };
+      }
+
+      const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const textColor = isDarkMode ? '#f0ede8' : '#1a1a18';
+      const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+
+      Chart.defaults.color = textColor;
+      Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+      // Incident Type Pie Chart
+      const pieCtx = document.getElementById('incidentTypeChart').getContext('2d');
+      new Chart(pieCtx, {
+        type: 'doughnut',
+        data: {
+          labels: incidentData.map(d => d.incident_type),
+          datasets: [{
+            data: incidentData.map(d => d.count),
+            backgroundColor: ['#185FA5', '#E24B4A', '#ba7517', '#3B6D11', '#533489', '#888780'],
+            borderWidth: 0,
+            hoverOffset: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: {
+                boxWidth: 12,
+                font: { size: 11 }
+              }
+            }
+          },
+          cutout: '65%'
+        }
+      });
+
+      // Severity Bar Chart
+      const severityColors = {
+        'Critical': '#E24B4A', // red
+        'High': '#ba7517',     // orange
+        'Medium': '#185FA5',   // blue
+        'Low': '#3B6D11'       // green
+      };
+
+      const barCtx = document.getElementById('severityChart').getContext('2d');
+      new Chart(barCtx, {
+        type: 'bar',
+        data: {
+          labels: severityData.map(d => d.severity),
+          datasets: [{
+            label: 'Incidents',
+            data: severityData.map(d => d.count),
+            backgroundColor: severityData.map(d => severityColors[d.severity] || '#888780'),
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { stepSize: 1 },
+              grid: { color: gridColor, drawBorder: false }
+            },
+            x: {
+              grid: { display: false, drawBorder: false }
+            }
+          }
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

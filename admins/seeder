@@ -1,0 +1,14 @@
+
+python manage.py shell 
+from yourapp.models import Admin
+
+Admin.objects.get_or_create(
+    email="ynnahsordan@gmail.com",
+    defaults={
+        "rank": "ltcol",
+        "fullname": "Ynnah Sordan",
+        "password": "123456789"
+    }
+)
+
+exit()
