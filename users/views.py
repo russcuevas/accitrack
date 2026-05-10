@@ -1,6 +1,10 @@
+
 from django.shortcuts import render
 from reports.models import Report
-from django.db.models import Q
+from django.db.models import Q, Count, Max
+from django.utils import timezone
+from datetime import timedelta, date
+import json
 
 def home(request):
     total_incidents = Report.objects.count()
@@ -26,3 +30,67 @@ def home(request):
         'searched_reports': searched_reports,
     }
     return render(request, 'users/home.html', context)
+
+
+# User-facing map view for incidents and prone areas
+def maps_view(request):
+    now = timezone.now()
+    today = now.date()
+    yesterday = today - timedelta(days=1)
+    last_month_start = today - timedelta(days=30)
+    last_year_start = today - timedelta(days=365)
+
+    def get_period_data(start_date, end_date=None, status_list=['In Review', 'Resolved']):
+        qs = Report.objects.filter(latitude__isnull=False, longitude__isnull=False)
+        if end_date:
+            qs = qs.filter(date_filed__date__range=[start_date, end_date])
+        else:
+            qs = qs.filter(date_filed__date=start_date)
+        if status_list:
+            qs = qs.filter(status__in=status_list)
+        map_data = list(qs.values('location_address').annotate(
+            count=Count('id'),
+            lat=Max('latitude'),
+            lng=Max('longitude'),
+            latest_type=Max('incident_type'),
+            latest_time=Max('incident_time')
+        ))
+        for r in map_data:
+            r['lat'] = float(r['lat'])
+            r['lng'] = float(r['lng'])
+            if r.get('latest_time'):
+                r['latest_time'] = r['latest_time'].strftime('%I:%M %p') if hasattr(r['latest_time'], 'strftime') else str(r['latest_time'])
+        return map_data
+
+    today_active = get_period_data(today, status_list=['In Review'])
+    today_resolved = get_period_data(today, status_list=['Resolved'])
+    yesterday_data = get_period_data(yesterday)
+    month_data = get_period_data(last_month_start, today)
+    year_data = get_period_data(last_year_start, today)
+
+    sel_year = request.GET.get('year')
+    sel_month = request.GET.get('month')
+    custom_data = []
+    is_custom = False
+    if sel_year and sel_month:
+        import calendar
+        y, m = int(sel_year), int(sel_month)
+        last_day = calendar.monthrange(y, m)[1]
+        start_date = date(y, m, 1)
+        end_date = date(y, m, last_day)
+        custom_data = get_period_data(start_date, end_date)
+        is_custom = True
+
+    context = {
+        'today_active_json': json.dumps(today_active),
+        'today_resolved_json': json.dumps(today_resolved),
+        'yesterday_data_json': json.dumps(yesterday_data),
+        'month_data_json': json.dumps(month_data),
+        'year_data_json': json.dumps(year_data),
+        'custom_data_json': json.dumps(custom_data),
+        'is_custom': is_custom,
+        'sel_year': sel_year,
+        'sel_month': sel_month,
+        'top_prone_list': sorted(month_data, key=lambda x: x['count'], reverse=True)[:5]
+    }
+    return render(request, 'users/maps.html', context)

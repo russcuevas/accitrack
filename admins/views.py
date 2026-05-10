@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from admins.models import Admin
+from django.http import JsonResponse
+from django.core.files.storage import FileSystemStorage
+from admins.models import Admin, Announcement, Documentation, AuditTrail
 from reports.models import Report
 from django.contrib.auth.hashers import check_password
 from django.contrib import messages
@@ -20,6 +22,28 @@ def get_admin_context(request):
         'admin_name': admin_name,
         'admin_rank': admin_rank,
     }
+
+def log_audit(request, action, description):
+    user_str = "Unknown User"
+    if request.session.get('admin_id'):
+        admin_id = request.session.get('admin_id')
+        admin = Admin.objects.filter(id=admin_id).first()
+        if admin:
+            user_str = f"{admin.rank} {admin.fullname}"
+    
+    # Get IP address
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+        
+    AuditTrail.objects.create(
+        user=user_str,
+        action=action,
+        description=description,
+        ip_address=ip
+    )
 
 def dashboard(request):
     if not request.session.get('admin_id'):
@@ -213,6 +237,7 @@ def update_report_status(request, report_id, action):
         messages.success(request, f'Report {report.incident_number} marked as Closed.')
         
     report.save(update_fields=['status'])
+    log_audit(request, 'CASE_EDITED', f"Modified case {report.incident_number} — updated status to '{report.status}'")
     return redirect(f'/admins/report/{report.id}/')
 
 def login(request):
@@ -232,6 +257,7 @@ def login_admin(request):
                 request.session['admin_name'] = admin.fullname
                 request.session['admin_rank'] = admin.rank
 
+                log_audit(request, 'LOGIN', f"Logged in from {request.META.get('REMOTE_ADDR')}")
                 messages.success(request, f'WELCOME ADMIN: {admin.fullname}', extra_tags='welcome')
                 return redirect('/admins/dashboard/')
             else:
@@ -274,6 +300,7 @@ def add_officer(request):
             rank=rank,
             password=make_password(password)
         )
+        log_audit(request, 'ACCOUNT_UPDATED', f"Created new officer account: {fullname}")
         messages.success(request, 'Officer added successfully.')
     return redirect('/admins/accounts/')
 
@@ -296,3 +323,136 @@ def edit_officer(request, officer_id):
         messages.success(request, 'Officer updated successfully.')
         
     return redirect('/admins/accounts/')
+
+def announcement_list(request):
+    if not request.session.get('admin_id'):
+        return redirect('/admins/login/')
+    
+    announcements = Announcement.objects.all().order_by('-date')
+    context = get_admin_context(request)
+    context.update({'announcements': announcements})
+    return render(request, 'admins/announcement.html', context)
+
+def add_announcement(request):
+    if not request.session.get('admin_id'):
+        return redirect('/admins/login/')
+        
+    if request.method == 'POST':
+        category = request.POST.get('category')
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        
+        Announcement.objects.create(
+            category=category,
+            title=title,
+            description=description
+        )
+        log_audit(request, 'ANNOUNCEMENT_CREATED', f"Created new announcement: {title}")
+        messages.success(request, 'Announcement added successfully.')
+    return redirect('/admins/announcement/')
+
+def edit_announcement(request, announcement_id):
+    if not request.session.get('admin_id'):
+        return redirect('/admins/login/')
+        
+    announcement = get_object_or_404(Announcement, id=announcement_id)
+    
+    if request.method == 'POST':
+        announcement.category = request.POST.get('category')
+        announcement.title = request.POST.get('title')
+        announcement.description = request.POST.get('description')
+        announcement.save()
+        messages.success(request, 'Announcement updated successfully.')
+        
+    return redirect('/admins/announcement/')
+
+def delete_announcement(request, announcement_id):
+    if not request.session.get('admin_id'):
+        return redirect('/admins/login/')
+        
+    announcement = get_object_or_404(Announcement, id=announcement_id)
+    announcement.delete()
+    messages.success(request, 'Announcement deleted successfully.')
+    return redirect('/admins/announcement/')
+
+def documentation_list(request):
+    if not request.session.get('admin_id'):
+        return redirect('/admins/login/')
+    
+    docs = Documentation.objects.all().order_by('-date')
+    reports = Report.objects.all().order_by('-date_filed')
+    context = get_admin_context(request)
+    context.update({
+        'docs': docs,
+        'reports': reports
+    })
+    return render(request, 'admins/documentation.html', context)
+
+def upload_document(request):
+    if not request.session.get('admin_id'):
+        return redirect('/admins/login/')
+        
+    if request.method == 'POST':
+        report_id = request.POST.get('case_id')
+        doc_type = request.POST.get('type')
+        description = request.POST.get('description')
+        uploaded_file = request.FILES.get('file')
+        additional_files = request.FILES.getlist('additional_images')
+        
+        admin_id = request.session.get('admin_id')
+        admin = Admin.objects.get(id=admin_id)
+        
+        report = get_object_or_404(Report, id=report_id)
+        
+        # Save additional images
+        image_urls = []
+        fs = FileSystemStorage(location='media/documentation/images/')
+        for img in additional_files:
+            filename = fs.save(img.name, img)
+            image_urls.append(f"/media/documentation/images/{filename}")
+        
+        doc = Documentation(
+            report=report,
+            type=doc_type,
+            description=description,
+            uploaded_by=f"{admin.rank} {admin.fullname}",
+            file=uploaded_file
+        )
+        doc.additional_images = image_urls
+        doc.save()
+        
+        log_audit(request, 'DOC_UPLOADED', f"Uploaded {uploaded_file.name} to case {report.incident_number}")
+        messages.success(request, 'Document and images uploaded successfully.')
+    return redirect('/admins/documentation/')
+
+def delete_document(request, doc_id):
+    if not request.session.get('admin_id'):
+        return redirect('/admins/login/')
+    
+    doc = get_object_or_404(Documentation, id=doc_id)
+    case_num = doc.report.incident_number
+    doc.delete()
+    log_audit(request, 'DOC_DELETED', f"Deleted document from case {case_num}")
+    messages.success(request, 'Document deleted successfully.')
+    return redirect('/admins/documentation/')
+
+def get_case_details(request, report_id):
+    report = get_object_or_404(Report, id=report_id)
+    data = {
+        'incident_number': report.incident_number,
+        'incident_type': report.incident_type,
+        'location': report.location_address,
+        'date': report.incident_date.strftime('%Y-%m-%d'),
+        'reporter': report.reporter_name,
+        'status': report.status,
+    }
+    return JsonResponse(data)
+
+def audit_trail_list(request):
+    if not request.session.get('admin_id'):
+        return redirect('/admins/login/')
+    
+    audits = AuditTrail.objects.all().order_by('-timestamp')
+    context = get_admin_context(request)
+    context.update({'audits': audits})
+    return render(request, 'admins/audit_trails.html', context)

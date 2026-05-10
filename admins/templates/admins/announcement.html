@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Accounts — Officer Management</title>
+    <title>Announcements — Admin Management</title>
     <style>
         *,
         *::before,
@@ -197,30 +197,6 @@
             gap: 12px;
         }
 
-        .notif-btn {
-            position: relative;
-            width: 34px;
-            height: 34px;
-            border-radius: var(--radius-md);
-            border: 0.5px solid var(--border);
-            background: var(--bg-secondary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-
-        .notif-dot {
-            position: absolute;
-            top: 6px;
-            right: 6px;
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: #E24B4A;
-            border: 1.5px solid var(--bg-primary);
-        }
-
         .profile-pill {
             display: flex;
             align-items: center;
@@ -270,18 +246,6 @@
             padding: 16px;
         }
 
-        .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 14px;
-        }
-
-        .card-title {
-            font-size: 13px;
-            font-weight: 500;
-        }
-
         .btn {
             padding: 7px 14px;
             border-radius: var(--radius-md);
@@ -292,6 +256,10 @@
             background: var(--bg-secondary);
             color: var(--text-primary);
             transition: all 0.15s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
         }
 
         .btn:hover {
@@ -302,6 +270,12 @@
             background: var(--bg-info);
             color: var(--text-info);
             border-color: rgba(24, 95, 165, 0.3);
+        }
+
+        .btn-danger {
+            background: var(--bg-danger);
+            color: var(--text-danger);
+            border-color: rgba(163, 45, 45, 0.3);
         }
 
         /* Table */
@@ -347,53 +321,19 @@
             font-weight: 500;
         }
 
-        .badge-green {
-            background: var(--bg-success);
-            color: var(--text-success);
-        }
-
-        .badge-amber {
-            background: var(--bg-warning);
-            color: var(--text-warning);
-        }
-
-        .badge-red {
+        .badge-safety {
             background: var(--bg-danger);
             color: var(--text-danger);
         }
 
-        /* Search bar */
-        .search-bar {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 16px;
-        }
-
-        .search-bar input,
-        .filter-select {
-            padding: 8px 12px;
-            border-radius: var(--radius-md);
-            border: 0.5px solid var(--border);
-            background: var(--bg-secondary);
-            font-size: 13px;
-            color: var(--text-primary);
-            font-family: var(--font);
-        }
-
-        .search-bar input {
-            flex: 1;
-        }
-
-        a.link {
+        .badge-system {
+            background: var(--bg-info);
             color: var(--text-info);
-            text-decoration: none;
-            cursor: pointer;
-            font-size: 12px;
         }
 
-        a.link:hover {
-            text-decoration: underline;
+        .badge-reminder {
+            background: var(--bg-warning);
+            color: var(--text-warning);
         }
 
         /* Modal Styles */
@@ -417,7 +357,7 @@
         .modal-box {
             background: var(--bg-primary);
             border-radius: var(--radius-lg);
-            width: 400px;
+            width: 500px;
             max-width: 90%;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
             overflow: hidden;
@@ -458,7 +398,8 @@
         }
 
         .form-group input,
-        .form-group select {
+        .form-group select,
+        .form-group textarea {
             width: 100%;
             padding: 10px 12px;
             border: 0.5px solid var(--border);
@@ -466,6 +407,12 @@
             background: var(--bg-secondary);
             color: var(--text-primary);
             font-size: 13px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
         }
 
         .modal-footer {
@@ -477,7 +424,7 @@
         }
 
         .btn-primary {
-            background: var(--text-info);
+            background: #185FA5;
             color: #fff;
             border: none;
         }
@@ -518,13 +465,14 @@
                     Dashboard
                 </div>
                 <div class="nav-item" onclick="window.location.href='/admins/maps/';">
-                  <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
-                    <path d="M8 1c3.3 0 6 2.7 6 6 0 4.3-6 8-6 8s-6-3.7-6-8c0-3.3 2.7-6 6-6z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity=".7"/>
-                    <circle cx="8" cy="7" r="2" stroke="currentColor" stroke-width="1.2" opacity=".7"/>
-                  </svg>
-                  Maps
+                    <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+                        <path d="M8 1c3.3 0 6 2.7 6 6 0 4.3-6 8-6 8s-6-3.7-6-8c0-3.3 2.7-6 6-6z" stroke="currentColor"
+                            stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity=".7" />
+                        <circle cx="8" cy="7" r="2" stroke="currentColor" stroke-width="1.2" opacity=".7" />
+                    </svg>
+                    Maps
                 </div>
-                <div class="nav-item active" onclick="window.location.href='/admins/accounts/';">
+                <div class="nav-item" onclick="window.location.href='/admins/accounts/';">
                     <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
                         <circle cx="8" cy="5" r="3" fill="currentColor" opacity=".7" />
                         <path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.5"
@@ -532,27 +480,29 @@
                     </svg>
                     Accounts
                 </div>
-              <div class="nav-item" onclick="window.location.href='/admins/announcement/';">
-          <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
-            <path d="M2 12h12v2H2v-2zM1 10h14v1H1v-1zM3 2h10v8H3V2z" fill="currentColor" opacity=".7" />
-          </svg>
-          Announcement
-        </div>
-        <div class="nav-item" onclick="window.location.href='/admins/documentation/';">
-          <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
-            <rect x="2" y="1" width="10" height="14" rx="1.5" stroke="currentColor" stroke-width="1.2" opacity=".7" />
-            <path d="M5 5h6M5 8h6M5 11h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
-              opacity=".7" />
-          </svg>
-          Documentation
-        </div>
-        <div class="nav-item" onclick="window.location.href='/admins/incident_reports/';">
-          <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
-            <path d="M8 2L14 13H2L8 2Z" stroke="currentColor" stroke-width="1.2" opacity=".7" />
-            <path d="M8 7v3M8 11.5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".7" />
-          </svg>
-          Incident Reports
-        </div>
+                <div class="nav-item active" onclick="window.location.href='/admins/announcement/';">
+                    <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+                        <path d="M2 12h12v2H2v-2zM1 10h14v1H1v-1zM3 2h10v8H3V2z" fill="currentColor" opacity=".7" />
+                    </svg>
+                    Announcement
+                </div>
+                <div class="nav-item" onclick="window.location.href='/admins/documentation/';">
+                    <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+                        <rect x="2" y="1" width="10" height="14" rx="1.5" stroke="currentColor" stroke-width="1.2"
+                            opacity=".7" />
+                        <path d="M5 5h6M5 8h6M5 11h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+                            opacity=".7" />
+                    </svg>
+                    Documentation
+                </div>
+                <div class="nav-item" onclick="window.location.href='/admins/incident_reports/';">
+                    <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
+                        <path d="M8 2L14 13H2L8 2Z" stroke="currentColor" stroke-width="1.2" opacity=".7" />
+                        <path d="M8 7v3M8 11.5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                            opacity=".7" />
+                    </svg>
+                    Incident Reports
+                </div>
                 <div class="nav-item" onclick="window.location.href='/admins/audit_trail/';">
                     <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
                         <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2" opacity=".7" />
@@ -566,8 +516,9 @@
             <div class="nav-bottom">
                 <div class="nav-item" id="theme-toggle" onclick="toggleTheme()">
                     <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
-                      <path d="M8 12a4 4 0 100-8 4 4 0 000 8z" fill="currentColor" opacity=".7"/>
-                      <path d="M8 1v1M8 14v1M1 8h1M14 8h1M2.5 2.5l1 1M12.5 12.5l1 1M2.5 12.5l1-1M12.5 3.5l1-1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity=".7"/>
+                        <path d="M8 12a4 4 0 100-8 4 4 0 000 8z" fill="currentColor" opacity=".7" />
+                        <path d="M8 1v1M8 14v1M1 8h1M14 8h1M2.5 2.5l1 1M12.5 12.5l1 1M2.5 12.5l1-1M12.5 3.5l1-1"
+                            stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity=".7" />
                     </svg>
                     <span id="theme-text">Light Mode</span>
                 </div>
@@ -584,7 +535,7 @@
         <!-- MAIN CONTENT -->
         <div class="main">
             <div class="topbar">
-                <div class="topbar-title">Account Management</div>
+                <div class="topbar-title">Announcement Management</div>
                 <div class="topbar-right">
                     <div class="profile-pill">
                         <div class="avatar">{% if admin_name %}{{ admin_name|slice:":1" }}{% else %}A{% endif %}</div>
@@ -598,61 +549,62 @@
             </div>
 
             <div class="content">
-                <div class="section-title">Police Officer Accounts</div>
-                <div class="search-bar">
-                    <input type="text" placeholder="Search officer name or badge number...">
-                    <select class="filter-select">
-                        <option>All Ranks</option>
-                        <option>P/Cpl</option>
-                        <option>P/Sgt</option>
-                        <option>Lt.</option>
-                    </select>
-                    <button class="btn btn-edit" onclick="openAddModal()">+ Add Officer</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div class="section-title" style="margin-bottom: 0;">Announcements</div>
+                    <button class="btn btn-primary" onclick="openAddModal()">+ Add Announcement</button>
                 </div>
+
                 <div class="card" style="padding:0;">
                     <div class="table-wrap">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Name</th>
-                                    <th>Rank</th>
-                                    <th>Status</th>
+                                    <th>Category</th>
+                                    <th>Title</th>
+                                    <th>Description</th>
+                                    <th>Date Created</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for officer in officers %}
+                                {% for announcement in announcements %}
                                 <tr>
                                     <td>
-                                        <div style="display:flex;align-items:center;gap:8px;">
-                                            <div class="avatar"
-                                                style="width:28px;height:28px;font-size:11px;background:#185FA5;">
-                                                {{ officer.fullname|slice:":2"|upper }}
-                                            </div>
-                                            <div>
-                                                <div style="font-weight: 500;">{{ officer.fullname }}</div>
-                                                <div style="font-size: 11px; color: var(--text-secondary);">
-                                                    {{officer.email }}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        {% if officer.rank == 'P/Cpl' %}
-                                        <span style="font-weight: 500; color: var(--text-secondary);">P/Cpl</span>
-                                        {% elif officer.rank == 'P/Sgt' %}
-                                        <span style="font-weight: 500; color: var(--text-info);">P/Sgt</span>
+                                        {% if announcement.category == 'SAFETY ADVISORY' %}
+                                        <span class="badge badge-safety">Safety Advisory</span>
+                                        {% elif announcement.category == 'SYSTEM UPDATE' %}
+                                        <span class="badge badge-system">System Update</span>
                                         {% else %}
-                                        <span style="font-weight: 500;">{{ officer.rank }}</span>
+                                        <span class="badge badge-reminder">Reminder</span>
                                         {% endif %}
                                     </td>
-                                    <td><span class="badge badge-green">Active</span></td>
-                                    <td><a class="link"
-                                            onclick="openEditModal('{{ officer.id }}', '{{ officer.fullname|escapejs }}', '{{ officer.email|escapejs }}', '{{ officer.rank|escapejs }}')">Edit</a>
+                                    <td>
+                                        <div style="font-weight: 600; color: var(--text-primary);">{{ announcement.title
+                                            }}</div>
+                                    </td>
+                                    <td>
+                                        <div
+                                            style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-secondary);">
+                                            {{ announcement.description }}</div>
+                                    </td>
+                                    <td>{{ announcement.date|date:"M d, Y" }}</td>
+                                    <td>
+                                        <div style="display: flex; gap: 8px;">
+                                            <a class="btn btn-edit"
+                                                onclick="openEditModal('{{ announcement.id }}', '{{ announcement.category|escapejs }}', '{{ announcement.title|escapejs }}', '{{ announcement.description|escapejs }}')">
+                                                Edit
+                                            </a>
+                                            <a class="btn btn-danger" onclick="confirmDelete('{{ announcement.id }}')">
+                                                Delete
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="4" style="text-align: center;">No officers found.</td>
+                                    <td colspan="5"
+                                        style="text-align: center; padding: 40px; color: var(--text-tertiary);">No
+                                        announcements found.</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -663,83 +615,71 @@
         </div>
     </div>
 
-    <!-- Add Officer Modal -->
+    <!-- Add Modal -->
     <div class="modal-overlay" id="addModal">
         <div class="modal-box">
             <div class="modal-header">
-                <div class="modal-title">Add New Officer</div>
+                <div class="modal-title">Create Announcement</div>
                 <div class="modal-close" onclick="closeModal('addModal')">&times;</div>
             </div>
-            <form action="{% url 'admins:add_officer' %}" method="POST">
+            <form action="{% url 'admins:add_announcement' %}" method="POST">
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="form-group">
-                        <label>Full Name</label>
-                        <input type="text" name="fullname" required placeholder="e.g. Juan Dela Cruz">
-                    </div>
-                    <div class="form-group">
-                        <label>Email Address</label>
-                        <input type="email" name="email" required placeholder="email@example.com">
-                    </div>
-                    <div class="form-group">
-                        <label>Rank</label>
-                        <select name="rank" required>
-                            <option value="P/Cpl">P/Cpl</option>
-                            <option value="P/Sgt">P/Sgt</option>
-                            <option value="Lt.">Lt.</option>
-                            <option value="Capt.">Capt.</option>
-                            <option value="Maj.">Maj.</option>
+                        <label>Category</label>
+                        <select name="category" required>
+                            <option value="SAFETY ADVISORY">Safety Advisory</option>
+                            <option value="SYSTEM UPDATE">System Update</option>
+                            <option value="REMINDER">Reminder</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Password</label>
-                        <input type="password" name="password" required placeholder="Enter password">
+                        <label>Title</label>
+                        <input type="text" name="title" required placeholder="Announcement headline">
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea name="description" required placeholder="Detailed message..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn" onclick="closeModal('addModal')">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Officer</button>
+                    <button type="submit" class="btn btn-primary">Post Announcement</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Edit Officer Modal -->
+    <!-- Edit Modal -->
     <div class="modal-overlay" id="editModal">
         <div class="modal-box">
             <div class="modal-header">
-                <div class="modal-title">Edit Officer</div>
+                <div class="modal-title">Edit Announcement</div>
                 <div class="modal-close" onclick="closeModal('editModal')">&times;</div>
             </div>
             <form id="editForm" method="POST">
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="form-group">
-                        <label>Full Name</label>
-                        <input type="text" id="edit_fullname" name="fullname" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Email Address</label>
-                        <input type="email" id="edit_email" name="email" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Rank</label>
-                        <select id="edit_rank" name="rank" required>
-                            <option value="P/Cpl">P/Cpl</option>
-                            <option value="P/Sgt">P/Sgt</option>
-                            <option value="Lt.">Lt.</option>
-                            <option value="Capt.">Capt.</option>
-                            <option value="Maj.">Maj.</option>
+                        <label>Category</label>
+                        <select id="edit_category" name="category" required>
+                            <option value="SAFETY ADVISORY">Safety Advisory</option>
+                            <option value="SYSTEM UPDATE">System Update</option>
+                            <option value="REMINDER">Reminder</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>New Password (Optional)</label>
-                        <input type="password" name="password" placeholder="Leave blank to keep current password">
+                        <label>Title</label>
+                        <input type="text" id="edit_title" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="edit_description" name="description" required></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn" onclick="closeModal('editModal')">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Update Officer</button>
+                    <button type="submit" class="btn btn-primary">Update Announcement</button>
                 </div>
             </form>
         </div>
@@ -755,12 +695,28 @@
             document.getElementById(modalId).classList.remove('active');
         }
 
-        function openEditModal(id, fullname, email, rank) {
-            document.getElementById('edit_fullname').value = fullname;
-            document.getElementById('edit_email').value = email;
-            document.getElementById('edit_rank').value = rank;
-            document.getElementById('editForm').action = `/admins/accounts/edit/${id}/`;
+        function openEditModal(id, category, title, description) {
+            document.getElementById('edit_category').value = category;
+            document.getElementById('edit_title').value = title;
+            document.getElementById('edit_description').value = description;
+            document.getElementById('editForm').action = `/admins/announcement/edit/${id}/`;
             document.getElementById('editModal').classList.add('active');
+        }
+
+        function confirmDelete(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#185FA5',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = `/admins/announcement/delete/${id}/`;
+                }
+            })
         }
     </script>
     {% if messages %}
@@ -788,7 +744,6 @@
                 const themeText = document.getElementById('theme-text');
                 if (themeText) themeText.textContent = 'Light Mode';
             }
-            window.dispatchEvent(new Event('themeChanged'));
         }
 
         function toggleTheme() {

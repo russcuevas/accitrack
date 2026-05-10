@@ -16,4 +16,13 @@ urlpatterns = [
     path('prone/locations/', views.prone_locations, name='prone_locations'),
     path('accounts/add/', views.add_officer, name='add_officer'),
     path('accounts/edit/<int:officer_id>/', views.edit_officer, name='edit_officer'),
+    path('announcement/', views.announcement_list, name='announcement_list'),
+    path('announcement/add/', views.add_announcement, name='add_announcement'),
+    path('announcement/edit/<int:announcement_id>/', views.edit_announcement, name='edit_announcement'),
+    path('announcement/delete/<int:announcement_id>/', views.delete_announcement, name='delete_announcement'),
+    path('documentation/', views.documentation_list, name='documentation_list'),
+    path('documentation/upload/', views.upload_document, name='upload_document'),
+    path('documentation/delete/<int:doc_id>/', views.delete_document, name='delete_document'),
+    path('documentation/get_case/<int:report_id>/', views.get_case_details, name='get_case_details'),
+    path('audit_trail/', views.audit_trail_list, name='audit_trail_list'),
 ]

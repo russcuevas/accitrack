@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incident Map — AcciTrack</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0d2040;
+            --bg-secondary: #0d2040;
+            --bg-tertiary: #0b1a2e;
+            --bg-info: #0c2a44;
+            --bg-success: #172a0a;
+            --bg-warning: #2a1e06;
+            --bg-danger: #2a0f0f;
+            --text-primary: #f0ede8;
+            --text-secondary: #a0a09a;
+            --text-tertiary: #6a6a64;
+            --text-info: #85b7eb;
+            --text-success: #97c459;
+            --text-warning: #fac775;
+            --text-danger: #f09595;
+            --border: rgba(255, 255, 255, 0.1);
+            --border-md: rgba(255, 255, 255, 0.18);
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        body {
+            font-family: 'Barlow', sans-serif;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            height: 100vh;
+            margin: 0;
+        }
+
+        /* NAVBAR STYLES FROM HOME.HTML */
+        .navbar {
+          background-color: #0d2040;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .navbar-brand {
+          font-family: 'Barlow Condensed', sans-serif;
+          font-size: 1.4rem;
+          letter-spacing: 0.06em;
+          color: #fff !important;
+        }
+
+        .nav-link {
+          color: #8fa3c8 !important;
+          font-size: 0.9rem;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+          color: #fff !important;
+        }
+
+        .btn-report-nav {
+          background: #e8372c;
+          border: none;
+          color: #fff;
+          font-family: 'Barlow Condensed', sans-serif;
+          letter-spacing: 0.05em;
+          font-size: 1rem;
+        }
+
+        .btn-report-nav:hover {
+          background: #c42d23;
+          color: #fff;
+        }
+
+        .btn-outline-light-custom {
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          color: #dce8f5;
+          background: transparent;
+          font-size: 1.05rem;
+          padding: 10px 26px;
+          font-family: 'Barlow Condensed', sans-serif;
+          letter-spacing: 0.05em;
+        }
+
+        .btn-outline-light-custom:hover {
+          background: rgba(255, 255, 255, 0.06);
+          color: #fff;
+        }
+
+        .main {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .topbar {
+            padding: 16px;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border);
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .content {
+            flex: 1;
+            position: relative;
+        }
+
+        #bigMap {
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-legend {
+            position: absolute;
+            top: 80px;
+            left: 20px;
+            background: rgba(13, 32, 64, 0.9);
+            padding: 14px 18px;
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            backdrop-filter: blur(8px);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .legend-circle {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+        }
+
+        .lc-yellow {
+            background: #ffcc00;
+            border-color: #ba7517;
+            box-shadow: 0 0 5px #ffcc00;
+        }
+
+        .lc-red {
+            background: #ff3333;
+            border-color: #a32d2d;
+            box-shadow: 0 0 5px #ff3333;
+        }
+
+        .btn-show-prone {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            z-index: 1000;
+            padding: 10px 18px;
+            background: var(--bg-primary);
+            border: 0.5px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-show-prone:hover {
+            background: var(--bg-secondary);
+            transform: translateY(-1px);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-card {
+            width: 1000px;
+            max-width: 95%;
+            background: var(--bg-primary);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            padding: 24px 30px;
+            background: var(--bg-secondary);
+            border-bottom: 0.5px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            cursor: pointer;
+            color: var(--text-tertiary);
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 20px 0;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .prone-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            border-bottom: 0.5px solid var(--border);
+        }
+
+        .prone-item:last-child {
+            border-bottom: none;
+        }
+
+        .prone-item-info {
+            flex: 1;
+            margin-right: 12px;
+        }
+
+        .prone-item-addr {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .prone-item-count {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .prone-item-rank {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-warning);
+            opacity: 0.6;
+        }
+
+        .pulse-prone {
+            fill-opacity: 0.4 !important;
+            stroke-opacity: 0.8 !important;
+            stroke-width: 2px !important;
+            animation: red-pulse 1.5s infinite alternate ease-in-out !important;
+        }
+
+        .pulse-yellow {
+            fill-opacity: 0.4 !important;
+            stroke-opacity: 0.8 !important;
+            stroke-width: 2px !important;
+            animation: yellow-pulse 1.5s infinite alternate ease-in-out !important;
+        }
+
+        @keyframes red-pulse {
+            0% {
+                fill-opacity: 0.2 !important;
+                stroke-width: 2px !important;
+                filter: drop-shadow(0 0 2px rgba(232, 55, 44, 0.5));
+            }
+
+            100% {
+                fill-opacity: 0.6 !important;
+                stroke-width: 8px !important;
+                filter: drop-shadow(0 0 10px rgba(232, 55, 44, 0.8));
+            }
+        }
+
+        @keyframes yellow-pulse {
+            0% {
+                fill-opacity: 0.2 !important;
+                stroke-width: 2px !important;
+                filter: drop-shadow(0 0 2px rgba(255, 204, 0, 0.5));
+            }
+
+            100% {
+                fill-opacity: 0.6 !important;
+                stroke-width: 8px !important;
+                filter: drop-shadow(0 0 10px rgba(255, 204, 0, 0.8));
+            }
+        }
+
+        /* Light Mode Overrides */
+        body.light-mode {
+            background-color: #f4f7fa;
+            color: #1e293b;
+        }
+
+        body.light-mode .navbar {
+            background-color: #ffffff;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        body.light-mode .navbar-brand {
+            color: #0f2040 !important;
+        }
+
+        body.light-mode .nav-link {
+            color: #64748b !important;
+        }
+
+        body.light-mode .nav-link:hover,
+        body.light-mode .nav-link.active {
+            color: #e8372c !important;
+        }
+
+        body.light-mode .navbar-toggler i {
+            color: #0f2040 !important;
+        }
+
+        body.light-mode .btn-outline-light-custom {
+            border: 1px solid rgba(15, 32, 64, 0.2);
+            color: #0f2040;
+        }
+
+        body.light-mode .btn-outline-light-custom:hover {
+            background: rgba(15, 32, 64, 0.05);
+            color: #0f2040;
+        }
+
+        body.light-mode .topbar {
+            background: #ffffff;
+            color: #0f2040;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        body.light-mode .map-legend {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(0, 0, 0, 0.05);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(8px);
+        }
+
+        body.light-mode .modal-card,
+        body.light-mode .modal-header,
+        body.light-mode .btn-show-prone {
+            background: #ffffff;
+            color: #1e293b;
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode .legend-item,
+        body.light-mode .modal-title,
+        body.light-mode .prone-item-addr {
+            color: #1e293b;
+        }
+
+        body.light-mode .prone-item {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+    </script>
+    <!-- ===== NAVBAR ===== -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+                <i class="bi bi-shield-check text-danger"></i> AcciTrack
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+                <i class="bi bi-list text-white fs-4"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navMenu">
+                <ul class="navbar-nav me-auto ms-4 gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/maps">Maps</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center gap-3">
+                    <button id="themeToggle" class="btn btn-outline-light-custom btn-sm px-2 border-0"
+                        title="Toggle Light/Dark Mode">
+                        <i class="bi bi-sun-fill fs-5" id="themeIcon"></i>
+                    </button>
+                    <a href="/#report-form" class="btn btn-report-nav btn-sm px-3">
+                        <i class="bi bi-plus-lg me-1"></i> Report Accident
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="main">
+        <div class="topbar">Incident Map — See Recent and Historical Accidents</div>
+        <div class="content">
+            <div id="bigMap"></div>
+            <div class="map-legend">
+                <div class="legend-item">
+                    <div class="legend-circle lc-yellow"></div><span>Active Incidents</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-circle lc-red"></div><span>Prone Incidents Hotspots</span>
+                </div>
+            </div>
+            <div class="btn-show-prone" onclick="toggleModal(true)">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                    <path d="M8 1c3.3 0 6 2.7 6 6 0 4.3-6 8-6 8s-6-3.7-6-8c0-3.3 2.7-6 6-6z" stroke="currentColor"
+                        stroke-width="1.5" />
+                </svg>
+                View Top Prone Spots
+            </div>
+            <div class="modal-overlay" id="proneModal">
+                <div class="modal-card">
+                    <div class="modal-header">
+                        <div>
+                            <div class="modal-title">Top Prone Accidents</div>
+                            <div id="period-label"
+                                style="font-size: 10px; color: var(--text-warning); text-transform: uppercase; margin-top: 2px;">
+                                LAST 30 DAYS</div>
+                        </div>
+                        <div class="modal-close" onclick="toggleModal(false)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M18 6L6 18M6 6l12 12" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="modal-body" id="prone-list-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('bigMap', { zoomControl: false }).setView([13.9419, 121.1644], 12);
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
+        let currentTileLayer;
+        const cartoDark = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+        const cartoLight = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+        function updateMapTiles() {
+            if (currentTileLayer) map.removeLayer(currentTileLayer);
+            const isLight = document.body.classList.contains('light-mode');
+            currentTileLayer = L.tileLayer(isLight ? cartoLight : cartoDark, { attribution: '&copy; OpenStreetMap contributors &copy; CARTO' }).addTo(map);
+        }
+        updateMapTiles();
+        map.createPane('hotspotPane');
+        map.getPane('hotspotPane').style.zIndex = 650;
+        map.getPane('hotspotPane').style.pointerEvents = 'none';
+        fetch('https://nominatim.openstreetmap.org/search?q=Lipa,+Batangas,+Philippines&polygon_geojson=1&format=json')
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    const boundary = data.find(item => item.geojson && (item.geojson.type === 'Polygon' || item.geojson.type === 'MultiPolygon'));
+                    if (boundary) {
+                        const geoLayer = L.geoJSON(boundary.geojson, { style: { color: '#00ff88', className: 'pulse-lipa' } }).addTo(map);
+                        map.fitBounds(geoLayer.getBounds(), { padding: [20, 20] });
+                    }
+                }
+            });
+        const datasets = {
+            today_active: JSON.parse('{{ today_active_json|escapejs }}' || '[]'),
+            today_resolved: JSON.parse('{{ today_resolved_json|escapejs }}' || '[]'),
+            yesterday: JSON.parse('{{ yesterday_data_json|escapejs }}' || '[]'),
+            month: JSON.parse('{{ month_data_json|escapejs }}' || '[]'),
+            year: JSON.parse('{{ year_data_json|escapejs }}' || '[]'),
+            custom: JSON.parse('{{ custom_data_json|escapejs }}' || '[]')
+        };
+        const hotspotLayer = L.layerGroup().addTo(map);
+        function addHotspotMarker(item, type) {
+            const isYellow = (type === 'yellow');
+            const radius = 80 + (item.count * 40);
+            const color = isYellow ? '#ffcc00' : '#ff3333';
+            const pulseClass = isYellow ? 'pulse-yellow' : 'pulse-prone';
+            const circle = L.circle([item.lat, item.lng], {
+                color: color,
+                fillColor: color,
+                fillOpacity: 0.4,
+                radius: radius,
+                className: pulseClass,
+                pane: 'hotspotPane',
+                interactive: true
+            }).addTo(hotspotLayer);
+            const popupContent = `
+                <div class="map-popup-header" style="color:${isYellow ? '#ba7517' : '#e8372c'};">
+                    ${isYellow ? '⚡ ACTIVE REPORT' : '⚠️ PRONE AREA'}
+                </div>
+                <div class="map-popup-text"><strong>Location:</strong> ${item.location_address}</div>
+                ${item.latest_type ? `<div class="map-popup-text"><strong>Incident:</strong> ${item.latest_type}</div>` : ''}
+                ${item.latest_time ? `<div class="map-popup-text"><strong>Time:</strong> ${item.latest_time}</div>` : ''}
+                <div class="map-popup-text"><strong>Total Reports:</strong> ${item.count}</div>
+            `;
+            circle.bindPopup(popupContent);
+        }
+        function switchPeriod(period) {
+            document.getElementById('period-label').innerText = period.toUpperCase();
+            hotspotLayer.clearLayers();
+            let displayData = [];
+            if (period === 'today') {
+                datasets.year.forEach(item => { addHotspotMarker(item, 'red'); displayData.push(item); });
+                datasets.today_active.forEach(item => { addHotspotMarker(item, 'yellow'); });
+            } else {
+                datasets[period].forEach(item => { addHotspotMarker(item, 'red'); displayData.push(item); });
+            }
+            const sorted = [...displayData].sort((a, b) => b.count - a.count).slice(0, 5);
+            const listContainer = document.getElementById('prone-list-container');
+            listContainer.innerHTML = '';
+            if (sorted.length === 0) {
+                listContainer.innerHTML = '<div class="p-4 text-center text-muted" style="font-size: 12px;">No data for this period.</div>';
+            } else {
+                sorted.forEach((item, index) => {
+                    const row = document.createElement('div');
+                    row.className = 'prone-item';
+                    row.onclick = () => { panToProne(item.lat, item.lng); toggleModal(false); };
+                    row.innerHTML = `
+                        <div class="prone-item-info">
+                            <div class="prone-item-addr">${item.location_address}</div>
+                            <div class="prone-item-count">${item.count} Historical Incident${item.count > 1 ? 's' : ''}</div>
+                        </div>
+                        <div class="prone-item-rank">#${index + 1}</div>
+                    `;
+                    listContainer.appendChild(row);
+                });
+            }
+        }
+        function toggleModal(show) {
+            const modal = document.getElementById('proneModal');
+            modal.style.display = show ? 'flex' : 'none';
+        }
+        function panToProne(lat, lng) { map.setView([lat, lng], 16); }
+        // Default: show month (last 30 days)
+        switchPeriod('month');
+
+        // ===== THEME TOGGLE =====
+        const themeToggleBtn = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+
+        if (document.body.classList.contains('light-mode')) {
+            themeIcon.classList.replace('bi-sun-fill', 'bi-moon-fill');
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+
+            if (isLight) {
+                themeIcon.classList.replace('bi-sun-fill', 'bi-moon-fill');
+                localStorage.setItem('theme', 'light');
+            } else {
+                themeIcon.classList.replace('bi-moon-fill', 'bi-sun-fill');
+                localStorage.setItem('theme', 'dark');
+            }
+            updateMapTiles();
+        });
+    </script>
+</body>
+
+</html>

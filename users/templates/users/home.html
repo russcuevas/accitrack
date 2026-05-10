@@ -818,8 +818,8 @@
   <!-- ===== NAVBAR ===== -->
   <nav class="navbar navbar-expand-lg sticky-top">
     <div class="container">
-      <a class="navbar-brand d-flex align-items-center gap-2" href="#">
-        AcciTrack
+      <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+        <i class="bi bi-shield-check text-danger"></i> AcciTrack
       </a>
       <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
         <i class="bi bi-list text-white fs-4"></i>
@@ -827,7 +827,7 @@
       <div class="collapse navbar-collapse" id="navMenu">
         <ul class="navbar-nav me-auto ms-4 gap-1">
           <li class="nav-item"><a class="nav-link active" href="/">Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="">Maps</a></li>
+          <li class="nav-item"><a class="nav-link" href="/maps">Maps</a></li>
         </ul>
         <div class="d-flex align-items-center gap-3">
           <button id="themeToggle" class="btn btn-outline-light-custom btn-sm px-2 border-0"
@@ -1027,10 +1027,14 @@
               and sent directly to police dispatch.</p>
           </div>
 
-          <div class="alert mb-4" style="background: rgba(232, 55, 44, 0.1); border: 1px solid rgba(232, 55, 44, 0.3); color: #e8372c; border-radius: 6px;">
+          <div class="alert mb-4"
+            style="background: rgba(232, 55, 44, 0.1); border: 1px solid rgba(232, 55, 44, 0.3); color: #e8372c; border-radius: 6px;">
             <i class="bi bi-exclamation-octagon-fill me-2"></i>
-            <strong>WARNING:</strong> Filing a false report or posting fake news is a criminal offense. Violators will face severe legal consequences and penalties. For more information, please read the 
-            <a href="#" data-bs-toggle="modal" data-bs-target="#cybercrimeModal" style="color: #e8372c; text-decoration: underline; font-weight: bold;">Cybercrime Law</a> before filling out this form.
+            <strong>WARNING:</strong> Filing a false report or posting fake news is a criminal offense. Violators will
+            face severe legal consequences and penalties. For more information, please read the
+            <a href="#" data-bs-toggle="modal" data-bs-target="#cybercrimeModal"
+              style="color: #e8372c; text-decoration: underline; font-weight: bold;">Cybercrime Law</a> before filling
+            out this form.
           </div>
 
           {% if messages %}
@@ -1325,21 +1329,29 @@
   <!-- ===== CYBERCRIME LAW MODAL ===== -->
   <div class="modal fade" id="cybercrimeModal" tabindex="-1" aria-labelledby="cybercrimeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-      <div class="modal-content" style="background-color: #0f2040; border: 1px solid rgba(255,255,255,0.1); color: #dce8f5;">
+      <div class="modal-content"
+        style="background-color: #0f2040; border: 1px solid rgba(255,255,255,0.1); color: #dce8f5;">
         <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.07);">
-          <h5 class="modal-title" id="cybercrimeModalLabel" style="font-family: 'Barlow Condensed', sans-serif; color: #fff;">Cybercrime Prevention Act & Anti-False Reporting</h5>
+          <h5 class="modal-title" id="cybercrimeModalLabel"
+            style="font-family: 'Barlow Condensed', sans-serif; color: #fff;">Cybercrime Prevention Act & Anti-False
+            Reporting</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body" style="font-size: 0.95rem; line-height: 1.6; color: #8fa3c8;">
-          <p><strong>Filing a false accident report or spreading fake news is strictly prohibited and is punishable by law.</strong></p>
-          <p>Under the <strong>Cybercrime Prevention Act of 2012 (Republic Act No. 10175)</strong> and other relevant Philippine laws, malicious dissemination of false information and submitting fabricated reports through digital systems can lead to:</p>
+          <p><strong>Filing a false accident report or spreading fake news is strictly prohibited and is punishable by
+              law.</strong></p>
+          <p>Under the <strong>Cybercrime Prevention Act of 2012 (Republic Act No. 10175)</strong> and other relevant
+            Philippine laws, malicious dissemination of false information and submitting fabricated reports through
+            digital systems can lead to:</p>
           <ul>
             <li>Imprisonment or severe criminal charges.</li>
             <li>Significant financial fines and penalties.</li>
             <li>Civil liabilities for damages caused to authorities and affected individuals.</li>
           </ul>
-          <p>The Philippine National Police (PNP) actively investigates all submitted reports. Any attempt to abuse this system will be traced and prosecuted to the fullest extent of the law.</p>
-          <p class="mb-0 text-white">By proceeding to submit a report, you certify that all information provided is true, accurate, and submitted in good faith.</p>
+          <p>The Philippine National Police (PNP) actively investigates all submitted reports. Any attempt to abuse this
+            system will be traced and prosecuted to the fullest extent of the law.</p>
+          <p class="mb-0 text-white">By proceeding to submit a report, you certify that all information provided is
+            true, accurate, and submitted in good faith.</p>
         </div>
         <div class="modal-footer" style="border-top: 1px solid rgba(255,255,255,0.07);">
           <button type="button" class="btn btn-primary-red" data-bs-dismiss="modal">I Understand</button>
