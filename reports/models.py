@@ -1,5 +1,6 @@
 from django.db import models
 
+# para magawa ang table na reports_report table sa database xampp
 class Report(models.Model):
     STATUS_CHOICES = [
         ('Pending', 'Pending'),

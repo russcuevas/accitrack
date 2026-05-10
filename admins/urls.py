@@ -3,6 +3,7 @@ from . import views
 
 app_name = 'admins'
 
+# mga url paths para sa admin portal tulad ng dashboard, accounts, at reports
 urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
     path('maps/', views.maps_view, name='maps'),

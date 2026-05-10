@@ -67,6 +67,7 @@ class Documentation(models.Model):
     def __str__(self):
         return self.doc_id
 
+# para magawa ang table na admins_audittrail table para sa history ng mga galaw ng admin
 class AuditTrail(models.Model):
     ACTION_CHOICES = [
         ('CASE_EDITED', 'Case edited'),

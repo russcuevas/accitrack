@@ -4,6 +4,7 @@ from .models import Report
 from django.core.files.storage import FileSystemStorage
 from django.utils import timezone
 
+# submit report para sa user side pagkatapos magpindot ng report button sa home page 
 def submit_report(request):
     if request.method == 'POST':
         # Retrieve form data

@@ -7,6 +7,8 @@ from django.utils import timezone
 from datetime import timedelta, date
 import json
 
+
+# home page para idisplay data sa user side yung mga nangyayaring aksidente at mga announcements 
 def home(request):
     total_incidents = Report.objects.count()
     pending_incidents = Report.objects.filter(status='Pending').count()
@@ -38,7 +40,7 @@ def home(request):
     return render(request, 'users/home.html', context)
 
 
-# User-facing map view for incidents and prone areas
+# map view para idisplay sa user side yung mga nangyayaring aksidente at mga prone areas
 def maps_view(request):
     now = timezone.localtime(timezone.now())
     today = now.date()

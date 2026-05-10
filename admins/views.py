@@ -6,6 +6,7 @@ from reports.models import Report
 from django.contrib.auth.hashers import check_password
 from django.contrib import messages
 
+# helper para makuha ang session details ng naka-login na admin tulad ng pangalan at rank dinidisplay yan sa taas right side sa admin dashboard
 def get_admin_context(request):
     """Helper to ensure admin session data is consistent"""
     admin_id = request.session.get('admin_id')
@@ -23,6 +24,7 @@ def get_admin_context(request):
         'admin_rank': admin_rank,
     }
 
+# para i-record sa database ang bawat pag process o galaw na ginagawa ng admin (Audit Trail)
 def log_audit(request, action, description):
     user_str = "Unknown User"
     if request.session.get('admin_id'):
@@ -45,6 +47,7 @@ def log_audit(request, action, description):
         ip_address=ip
     )
 
+# dashboard view kung saan makikita ang overview ng mga reports, statistics, at maps
 def dashboard(request):
     if not request.session.get('admin_id'):
         return redirect('/admins/login/')
@@ -86,6 +89,7 @@ def dashboard(request):
 
     return render(request, 'admins/dashboard.html', context)
 
+# map view para sa admin para makita ang location ng mga reports at prone areas
 def maps_view(request):
     if not request.session.get('admin_id'):
         return redirect('/admins/login/')
@@ -170,6 +174,7 @@ def maps_view(request):
     })
     return render(request, 'admins/maps.html', context)
 
+# listahan ng mga prone locations o mga lugar na madalas may aksidente
 def prone_locations(request):
     if not request.session.get('admin_id'):
         return redirect('/admins/login/')
@@ -183,6 +188,7 @@ def prone_locations(request):
     
     return render(request, 'admins/prone_locations.html', context)
 
+# para makita ang buong detalye ng isang specific na incident report
 def report_detail(request, report_id):
     if not request.session.get('admin_id'):
         return redirect('/admins/login/')
@@ -194,6 +200,7 @@ def report_detail(request, report_id):
     
     return render(request, 'admins/report_detail.html', context)
 
+# listahan ng lahat ng incident reports na pumasok sa system
 def incident_reports(request):
     if not request.session.get('admin_id'):
         return redirect('/admins/login/')
@@ -205,6 +212,7 @@ def incident_reports(request):
     
     return render(request, 'admins/incident_report.html', context)
 
+# page para makita ang lahat ng mga admin at officer accounts
 def accounts(request):
     if not request.session.get('admin_id'):
         return redirect('/admins/login/')
@@ -215,6 +223,7 @@ def accounts(request):
     context.update({'officers': officers})
     return render(request, 'admins/accounts.html', context)
 
+# para i-update ang status ng report (Accept, Resolve, Close, o Cancel)
 def update_report_status(request, report_id, action):
     if not request.session.get('admin_id'):
         return redirect('/admins/login/')
@@ -240,9 +249,11 @@ def update_report_status(request, report_id, action):
     log_audit(request, 'CASE_EDITED', f"Modified case {report.incident_number} — updated status to '{report.status}'")
     return redirect(f'/admins/report/{report.id}/')
 
+# login page para sa mga admin
 def login(request):
     return render(request, 'admins/login.html')
 
+# logic para sa pag-check ng login credentials ng admin
 def login_admin(request):
     if request.method == "POST":
         email = request.POST.get("email")
@@ -272,6 +283,7 @@ def login_admin(request):
 
     return render(request, 'admins/login.html')
 
+# para mag-logout at i-clear ang session ng admin
 def logout_admin(request):
     request.session.flush()
     messages.success(request, 'Logout successful')
@@ -279,6 +291,7 @@ def logout_admin(request):
 
 from django.contrib.auth.hashers import make_password
 
+# para magdagdag ng bagong officer account sa system
 def add_officer(request):
     if not request.session.get('admin_id'):
         return redirect('/admins/login/')
@@ -304,6 +317,7 @@ def add_officer(request):
         messages.success(request, 'Officer added successfully.')
     return redirect('/admins/accounts/')
 
+# para i-edit o i-update ang detalye ng existing na officer account
 def edit_officer(request, officer_id):
     if not request.session.get('admin_id'):
         return redirect('/admins/login/')
@@ -324,6 +338,7 @@ def edit_officer(request, officer_id):
         
     return redirect('/admins/accounts/')
 
+# listahan ng mga announcements na ginawa para sa user side
 def announcement_list(request):
     if not request.session.get('admin_id'):
         return redirect('/admins/login/')
@@ -333,6 +348,7 @@ def announcement_list(request):
     context.update({'announcements': announcements})
     return render(request, 'admins/announcement.html', context)
 
+# para gumawa ng bagong announcement
 def add_announcement(request):
     if not request.session.get('admin_id'):
         return redirect('/admins/login/')
@@ -351,6 +367,7 @@ def add_announcement(request):
         messages.success(request, 'Announcement added successfully.')
     return redirect('/admins/announcement/')
 
+# para i-edit ang nagawang announcement
 def edit_announcement(request, announcement_id):
     if not request.session.get('admin_id'):
         return redirect('/admins/login/')
@@ -366,6 +383,7 @@ def edit_announcement(request, announcement_id):
         
     return redirect('/admins/announcement/')
 
+# para magbura ng announcement
 def delete_announcement(request, announcement_id):
     if not request.session.get('admin_id'):
         return redirect('/admins/login/')
@@ -375,6 +393,7 @@ def delete_announcement(request, announcement_id):
     messages.success(request, 'Announcement deleted successfully.')
     return redirect('/admins/announcement/')
 
+# listahan ng mga documentation files tulad ng photo at sketch para sa bawat case
 def documentation_list(request):
     if not request.session.get('admin_id'):
         return redirect('/admins/login/')
@@ -388,6 +407,7 @@ def documentation_list(request):
     })
     return render(request, 'admins/documentation.html', context)
 
+# para mag-upload ng mga documentation files para sa isang incident report
 def upload_document(request):
     if not request.session.get('admin_id'):
         return redirect('/admins/login/')
@@ -425,6 +445,7 @@ def upload_document(request):
         messages.success(request, 'Document and images uploaded successfully.')
     return redirect('/admins/documentation/')
 
+# para magbura ng documentation file
 def delete_document(request, doc_id):
     if not request.session.get('admin_id'):
         return redirect('/admins/login/')
@@ -436,6 +457,7 @@ def delete_document(request, doc_id):
     messages.success(request, 'Document deleted successfully.')
     return redirect('/admins/documentation/')
 
+# API para makuha ang case details para sa documentation modal
 def get_case_details(request, report_id):
     report = get_object_or_404(Report, id=report_id)
     data = {
@@ -448,6 +470,7 @@ def get_case_details(request, report_id):
     }
     return JsonResponse(data)
 
+# para makita ang listahan ng Audit Trail o history ng mga ginawa ng admin
 def audit_trail_list(request):
     if not request.session.get('admin_id'):
         return redirect('/admins/login/')
