@@ -648,14 +648,14 @@
                 </div>
 
                 <div class="search-container">
-                    <input type="text" class="search-input"
-                        placeholder="Search documents by case number or description...">
-                    <select class="filter-select">
-                        <option value="">All Types</option>
-                        <option value="PHOTO">Photo</option>
-                        <option value="SKETCH">Sketch</option>
-                        <option value="MEDICAL">Medical</option>
-                        <option value="REPORT">Report</option>
+                    <input type="text" id="docSearch" class="search-input"
+                        placeholder="Search documents by case number or description..." onkeyup="filterDocs()">
+                    <select id="typeFilter" class="filter-select" onchange="filterDocs()">
+                        <option value="all">All Types</option>
+                        <option value="photo">Photo</option>
+                        <option value="sketch">Sketch</option>
+                        <option value="medical">Medical</option>
+                        <option value="report">Report</option>
                     </select>
                     <button class="btn btn-primary" onclick="openUploadModal()">+ Upload</button>
                 </div>
@@ -675,9 +675,9 @@
                                     <th>Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="docTableBody">
                                 {% for doc in docs %}
-                                <tr>
+                                <tr class="doc-row" data-type="{{ doc.type|lower }}" data-case="{{ doc.report.incident_number|lower }}" data-desc="{{ doc.description|lower }}">
                                     <td><span class="doc-id">{{ doc.doc_id }}</span></td>
                                     <td><span class="case-no">{{ doc.report.incident_number }}</span></td>
                                     <td><span class="badge badge-{{ doc.type|lower }}">{{ doc.get_type_display }}</span>
@@ -868,6 +868,27 @@
             const next = current === 'dark' ? 'light' : 'dark';
             localStorage.setItem('theme', next);
             applyTheme();
+        }
+
+        function filterDocs() {
+            const search = document.getElementById('docSearch').value.toLowerCase();
+            const type = document.getElementById('typeFilter').value.toLowerCase();
+            const rows = document.querySelectorAll('.doc-row');
+
+            rows.forEach(row => {
+                const docType = row.getAttribute('data-type');
+                const docCase = row.getAttribute('data-case');
+                const docDesc = row.getAttribute('data-desc');
+
+                const matchesSearch = docCase.includes(search) || docDesc.includes(search);
+                const matchesType = type === 'all' || docType === type;
+
+                if (matchesSearch && matchesType) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
         }
 
         applyTheme();

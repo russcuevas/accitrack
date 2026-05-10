@@ -483,8 +483,9 @@
       <div class="nav-bottom">
         <div class="nav-item" id="theme-toggle" onclick="toggleTheme()">
           <svg class="nav-icon" viewBox="0 0 16 16" fill="none">
-            <path d="M8 12a4 4 0 100-8 4 4 0 000 8z" fill="currentColor" opacity=".7"/>
-            <path d="M8 1v1M8 14v1M1 8h1M14 8h1M2.5 2.5l1 1M12.5 12.5l1 1M2.5 12.5l1-1M12.5 3.5l1-1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity=".7"/>
+            <path d="M8 12a4 4 0 100-8 4 4 0 000 8z" fill="currentColor" opacity=".7" />
+            <path d="M8 1v1M8 14v1M1 8h1M14 8h1M2.5 2.5l1 1M12.5 12.5l1 1M2.5 12.5l1-1M12.5 3.5l1-1"
+              stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity=".7" />
           </svg>
           <span id="theme-text">Light Mode</span>
         </div>
@@ -815,13 +816,14 @@
     {% if messages %}
     {% for message in messages %}
     Swal.fire({
-      icon: "{% if message.tags == 'success' or 'welcome' in message.tags %}success{% elif message.tags == 'error' %}error{% else %}info{% endif %}",
-      title: "Update",
+      icon: "{% if 'success' in message.tags or 'welcome' in message.tags %}success{% elif 'error' in message.tags %}error{% else %}info{% endif %}",
+      title: "{% if 'welcome' in message.tags %}Welcome{% elif 'success' in message.tags %}Success{% elif 'error' in message.tags %}Error{% else %}Update{% endif %}",
       text: "{{ message|escapejs }}",
       timer: 3000,
       showConfirmButton: false,
-      background: 'var(--bg-primary)',
-      color: 'var(--text-primary)'
+      background: document.body.classList.contains('light-mode') ? '#ffffff' : '#0d2040',
+      color: document.body.classList.contains('light-mode') ? '#1a1a18' : '#f0ede8',
+      iconColor: "{% if 'success' in message.tags or 'welcome' in message.tags %}#97c459{% elif 'error' in message.tags %}#f09595{% else %}#185FA5{% endif %}",
     });
     {% endfor %}
     {% endif %}

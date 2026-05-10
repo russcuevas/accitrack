@@ -1,6 +1,7 @@
 
 from django.shortcuts import render
 from reports.models import Report
+from admins.models import Announcement
 from django.db.models import Q, Count, Max
 from django.utils import timezone
 from datetime import timedelta, date
@@ -21,6 +22,9 @@ def home(request):
             Q(location_address__icontains=search_query)
         ).order_by('-date_filed')
     
+    announcements = Announcement.objects.all().order_by('-date')[:3]
+    all_announcements = Announcement.objects.all().order_by('-date')
+    
     context = {
         'total_incidents': total_incidents,
         'pending_incidents': pending_incidents,
@@ -28,13 +32,15 @@ def home(request):
         'resolved_incidents': resolved_incidents,
         'search_query': search_query,
         'searched_reports': searched_reports,
+        'announcements': announcements,
+        'all_announcements': all_announcements,
     }
     return render(request, 'users/home.html', context)
 
 
 # User-facing map view for incidents and prone areas
 def maps_view(request):
-    now = timezone.now()
+    now = timezone.localtime(timezone.now())
     today = now.date()
     yesterday = today - timedelta(days=1)
     last_month_start = today - timedelta(days=30)

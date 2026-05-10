@@ -1243,49 +1243,78 @@
           <div class="section-label mb-1">UPDATES</div>
           <h2 class="section-title mb-0">Announcements</h2>
         </div>
-        <a href="#" style="color:#e8372c;font-size:0.88rem;text-decoration:none">View all <i
-            class="bi bi-arrow-right"></i></a>
+        <a href="#" data-bs-toggle="modal" data-bs-target="#announcementsModal"
+          style="color:#e8372c;font-size:0.88rem;text-decoration:none">View all <i class="bi bi-arrow-right"></i></a>
       </div>
       <div class="row g-4">
+        {% for announcement in announcements %}
         <div class="col-md-4">
           <div class="news-card">
-            <div class="news-img">🚨</div>
+            <div class="news-img">
+              {% if announcement.category == 'SAFETY ADVISORY' %}🚨
+              {% elif announcement.category == 'SYSTEM UPDATE' %}📋
+              {% else %}🛡️{% endif %}
+            </div>
             <div class="news-body">
-              <div class="news-tag">SAFETY ADVISORY</div>
-              <div class="news-title">High accident zones identified in Metro area</div>
-              <p style="font-size:0.85rem;color:#8fa3c8;line-height:1.6">Authorities have flagged 5 intersections with
-                elevated accident frequency this quarter. Extra patrols have been deployed.</p>
-              <div class="news-meta"><i class="bi bi-calendar3 me-1"></i>Apr 12, 2026</div>
+              <div class="news-tag">{{ announcement.category }}</div>
+              <div class="news-title">{{ announcement.title }}</div>
+              <p style="font-size:0.85rem;color:#8fa3c8;line-height:1.6">{{ announcement.description|truncatechars:120}}
+              </p>
+              <div class="news-meta"><i class="bi bi-calendar3 me-1"></i>{{ announcement.date|date:"M d, Y" }}</div>
             </div>
           </div>
         </div>
-        <div class="col-md-4">
-          <div class="news-card">
-            <div class="news-img">📋</div>
-            <div class="news-body">
-              <div class="news-tag">SYSTEM UPDATE</div>
-              <div class="news-title">New real-time case tracking now available</div>
-              <p style="font-size:0.85rem;color:#8fa3c8;line-height:1.6">Citizens can now receive SMS and email
-                notifications when their submitted reports are updated by assigned officers.</p>
-              <div class="news-meta"><i class="bi bi-calendar3 me-1"></i>Apr 8, 2026</div>
-            </div>
-          </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+          <div class="text-secondary opacity-50">No recent announcements found.</div>
         </div>
-        <div class="col-md-4">
-          <div class="news-card">
-            <div class="news-img">🛡️</div>
-            <div class="news-body">
-              <div class="news-tag">REMINDER</div>
-              <div class="news-title">Filing a false report is a punishable offense</div>
-              <p style="font-size:0.85rem;color:#8fa3c8;line-height:1.6">The PNP reminds citizens that submitting false
-                accident reports is a criminal act under RA 10951 and may result in prosecution.</p>
-              <div class="news-meta"><i class="bi bi-calendar3 me-1"></i>Apr 1, 2026</div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Announcements Modal -->
+  <div class="modal fade" id="announcementsModal" tabindex="-1" aria-labelledby="announcementsModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content" style="background: #0d2040; color: #f0ede8; border: 1px solid rgba(255,255,255,0.1);">
+        <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+          <h5 class="modal-title display-font" id="announcementsModalLabel">ALL ANNOUNCEMENTS</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body py-4">
+          <div class="row g-4">
+            {% for announcement in all_announcements %}
+            <div class="col-12">
+              <div class="news-card"
+                style="display: flex; align-items: flex-start; gap: 1.5rem; background: rgba(255,255,255,0.02); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                <div class="news-img"
+                  style="font-size: 2rem; min-width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border-radius: 12px;">
+                  {% if announcement.category == 'SAFETY ADVISORY' %}🚨
+                  {% elif announcement.category == 'SYSTEM UPDATE' %}📋
+                  {% else %}🛡️{% endif %}
+                </div>
+                <div class="news-body" style="padding: 0; flex: 1;">
+                  <div class="news-tag" style="margin-bottom: 0.5rem;">{{ announcement.category }}</div>
+                  <div class="news-title" style="font-size: 1.2rem; margin-bottom: 0.5rem; color: #fff;">
+                    {{announcement.title }}</div>
+                  <p style="font-size:0.9rem;color:#8fa3c8;line-height:1.6; margin-bottom: 0.5rem;">
+                    {{announcement.description }}</p>
+                  <div class="news-meta" style="font-size: 0.8rem; color: #6c757d;"><i
+                      class="bi bi-calendar3 me-1"></i>{{announcement.date|date:"M d, Y" }}</div>
+                </div>
+              </div>
             </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+              <div class="text-secondary opacity-50">No announcements found.</div>
+            </div>
+            {% endfor %}
           </div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
 
   <!-- ===== FOOTER ===== -->
   <footer class="py-5">

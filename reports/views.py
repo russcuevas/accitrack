@@ -9,15 +9,7 @@ def submit_report(request):
         # Retrieve form data
         incident_date = request.POST.get('incident_date')
         
-        # Auto-generate current time in Asia/Manila
-        try:
-            import zoneinfo
-            tz = zoneinfo.ZoneInfo('Asia/Manila')
-        except ImportError:
-            import pytz
-            tz = pytz.timezone('Asia/Manila')
-            
-        current_time = timezone.now().astimezone(tz).time()
+        current_time = timezone.localtime(timezone.now())
         incident_time = current_time.strftime('%H:%M:%S')
 
         incident_type = request.POST.get('incident_type')

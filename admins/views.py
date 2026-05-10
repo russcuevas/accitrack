@@ -95,7 +95,7 @@ def maps_view(request):
     from datetime import timedelta
     import json
     
-    now = timezone.now()
+    now = timezone.localtime(timezone.now())
     today = now.date()
     yesterday = today - timedelta(days=1)
     last_month_start = today - timedelta(days=30)
